@@ -5,7 +5,7 @@ import { ChatMessage } from "@/components/chat/chat-message";
 import { TypingIndicator } from "@/components/chat/typing-indicator";
 import { Sidebar } from "@/components/layout/sidebar";
 import { useChat } from "@/hooks/use-chat";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth2";
 import { Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LoginModal } from "@/components/login-modal";
@@ -16,7 +16,17 @@ export default function Chat() {
   const params = new URLSearchParams(search);
   const conversationId = params.get("id") ? parseInt(params.get("id")!) : null;
 
-  const { user, isLoading: isAuthLoading } = useAuth();
+  // Try to get auth details, if auth context is available
+  let user = null;
+  let isAuthLoading = false;
+  
+  try {
+    const auth = useAuth();
+    user = auth.user;
+    isAuthLoading = auth.isLoading;
+  } catch (error) {
+    console.warn("Auth context not available:", error);
+  }
   const {
     messages,
     isLoading: isChatLoading,

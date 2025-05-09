@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Message, Conversation } from "@shared/schema";
 import { createConversation, getConversation, sendMessage } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth2";
 
 type ChatMessage = {
   id?: number;
@@ -16,6 +17,14 @@ export function useChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const { toast } = useToast();
+  
+  // Safely get auth context
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.warn("Auth context not available:", error);
+  }
 
   const loadConversation = useCallback(async (conversationId: number) => {
     try {

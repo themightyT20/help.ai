@@ -3,7 +3,7 @@ import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Plus, LogOut, Settings, HelpCircle, Menu, Moon, Sun } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth2";
 import { useTheme } from "next-themes";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +19,17 @@ interface SidebarProps {
 
 export function Sidebar({ onNewChat, currentConversationId }: SidebarProps) {
   const [location, navigate] = useLocation();
-  const { user, logout } = useAuth();
+  // Try to get auth details, if auth context is available
+  let user = null;
+  let logout = async () => {}; // Default no-op logout function
+  
+  try {
+    const auth = useAuth();
+    user = auth.user;
+    logout = auth.logout;
+  } catch (error) {
+    console.warn("Auth context not available in sidebar:", error);
+  }
   const [isOpen, setIsOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
@@ -27,10 +37,13 @@ export function Sidebar({ onNewChat, currentConversationId }: SidebarProps) {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   // Fetch the user's conversations
-  const { data: conversations, isLoading: isLoadingConversations } = useQuery({
+  const { data: conversationsData, isLoading: isLoadingConversations } = useQuery({
     queryKey: ['/api/conversations'],
     enabled: !!user,
   });
+  
+  // Ensure conversations is treated as an array
+  const conversations = Array.isArray(conversationsData) ? conversationsData : [];
 
   // Close sidebar on location change on mobile
   useEffect(() => {

@@ -35,6 +35,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
     queryKey: ['/api/me'],
     retry: false,
     staleTime: 1000 * 60 * 60, // 1 hour
+    queryFn: async ({ queryKey }) => {
+      try {
+        const response = await fetch(queryKey[0] as string, {
+          credentials: 'include',
+        });
+        
+        if (response.status === 401) {
+          return null;
+        }
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch user');
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        return null;
+      }
+    }
   });
 
   // Function to refresh user data
@@ -97,8 +117,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [queryClient, refetchUser]);
 
   // Create the auth value
-  const value = React.useMemo(() => ({
-    user: user || null,
+  const value = React.useMemo((): AuthContextType => ({
+    user: (user as User) || null,
     isLoading,
     error: error as Error | null,
     login,

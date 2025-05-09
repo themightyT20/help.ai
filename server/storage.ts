@@ -2,6 +2,10 @@ import {
   User, InsertUser, Conversation, InsertConversation, 
   Message, InsertMessage, ApiKey, InsertApiKey 
 } from "@shared/schema";
+import session from "express-session";
+import { db, pool } from './db';
+import connectPg from 'connect-pg-simple';
+import { and, desc, eq } from 'drizzle-orm';
 
 export interface IStorage {
   // User operations
@@ -28,180 +32,201 @@ export interface IStorage {
   getApiKeysByUserId(userId: number): Promise<ApiKey | undefined>;
   createApiKey(apiKey: InsertApiKey): Promise<ApiKey>;
   updateApiKey(userId: number, apiKey: Partial<ApiKey>): Promise<ApiKey | undefined>;
+  
+  // Session store for authentication
+  sessionStore: session.Store;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private conversations: Map<number, Conversation>;
-  private messages: Map<number, Message>;
-  private apiKeys: Map<number, ApiKey>;
-  private userIdCounter: number;
-  private conversationIdCounter: number;
-  private messageIdCounter: number;
-  private apiKeyIdCounter: number;
-
+// Database storage implementation using Drizzle ORM
+export class DatabaseStorage implements IStorage {
+  sessionStore: session.Store;
+  
   constructor() {
-    this.users = new Map();
-    this.conversations = new Map();
-    this.messages = new Map();
-    this.apiKeys = new Map();
-    this.userIdCounter = 1;
-    this.conversationIdCounter = 1;
-    this.messageIdCounter = 1;
-    this.apiKeyIdCounter = 1;
+    const PostgresSessionStore = connectPg(session);
+    this.sessionStore = new PostgresSessionStore({ 
+      pool, 
+      createTableIfMissing: true 
+    });
   }
 
   // User operations
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(schema.users).where(eq(schema.users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(schema.users).where(eq(schema.users.username, username));
+    return user;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.email === email,
-    );
+    if (!email) return undefined;
+    const [user] = await db.select().from(schema.users).where(eq(schema.users.email, email));
+    return user;
   }
 
   async getUserByProvider(provider: string, providerId: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.provider === provider && user.providerId === providerId,
+    const [user] = await db.select().from(schema.users).where(
+      and(
+        eq(schema.users.provider, provider),
+        eq(schema.users.providerId, providerId)
+      )
     );
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.userIdCounter++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db.insert(schema.users).values(insertUser).returning();
     return user;
   }
 
   async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
-    const user = this.users.get(id);
-    if (!user) return undefined;
-    
-    const updatedUser = { ...user, ...userData };
-    this.users.set(id, updatedUser);
+    const [updatedUser] = await db
+      .update(schema.users)
+      .set(userData)
+      .where(eq(schema.users.id, id))
+      .returning();
     return updatedUser;
   }
 
   // Conversation operations
   async getConversation(id: number): Promise<Conversation | undefined> {
-    return this.conversations.get(id);
+    const [conversation] = await db
+      .select()
+      .from(schema.conversations)
+      .where(eq(schema.conversations.id, id));
+    return conversation;
   }
 
   async getConversationsByUserId(userId: number): Promise<Conversation[]> {
-    return Array.from(this.conversations.values()).filter(
-      (conversation) => conversation.userId === userId,
-    );
+    return await db
+      .select()
+      .from(schema.conversations)
+      .where(eq(schema.conversations.userId, userId))
+      .orderBy(desc(schema.conversations.updatedAt));
   }
 
   async createConversation(insertConversation: InsertConversation): Promise<Conversation> {
-    const id = this.conversationIdCounter++;
     const now = new Date();
-    const conversation: Conversation = { 
-      ...insertConversation, 
-      id, 
-      createdAt: now, 
-      updatedAt: now 
+    const conversationWithTimestamps = {
+      ...insertConversation,
+      createdAt: now,
+      updatedAt: now
     };
-    this.conversations.set(id, conversation);
+    
+    const [conversation] = await db
+      .insert(schema.conversations)
+      .values(conversationWithTimestamps)
+      .returning();
+    
     return conversation;
   }
 
   async updateConversation(id: number, conversationData: Partial<Conversation>): Promise<Conversation | undefined> {
-    const conversation = this.conversations.get(id);
-    if (!conversation) return undefined;
-    
-    const updatedConversation = { 
-      ...conversation, 
+    const dataWithUpdatedAt = {
       ...conversationData,
       updatedAt: new Date()
     };
-    this.conversations.set(id, updatedConversation);
+    
+    const [updatedConversation] = await db
+      .update(schema.conversations)
+      .set(dataWithUpdatedAt)
+      .where(eq(schema.conversations.id, id))
+      .returning();
+    
     return updatedConversation;
   }
 
   async deleteConversation(id: number): Promise<boolean> {
-    // Delete all messages in the conversation
-    const messagesToDelete = Array.from(this.messages.values())
-      .filter(message => message.conversationId === id);
+    // Delete associated messages first
+    await db
+      .delete(schema.messages)
+      .where(eq(schema.messages.conversationId, id));
     
-    for (const message of messagesToDelete) {
-      this.messages.delete(message.id);
-    }
+    // Then delete the conversation
+    const [deleted] = await db
+      .delete(schema.conversations)
+      .where(eq(schema.conversations.id, id))
+      .returning();
     
-    // Delete the conversation
-    return this.conversations.delete(id);
+    return !!deleted;
   }
 
   // Message operations
   async getMessage(id: number): Promise<Message | undefined> {
-    return this.messages.get(id);
+    const [message] = await db
+      .select()
+      .from(schema.messages)
+      .where(eq(schema.messages.id, id));
+    
+    return message;
   }
 
   async getMessagesByConversationId(conversationId: number): Promise<Message[]> {
-    return Array.from(this.messages.values())
-      .filter(message => message.conversationId === conversationId)
-      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    return await db
+      .select()
+      .from(schema.messages)
+      .where(eq(schema.messages.conversationId, conversationId))
+      .orderBy(schema.messages.timestamp);
   }
 
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
-    const id = this.messageIdCounter++;
-    const now = new Date();
-    const message: Message = { 
-      ...insertMessage, 
-      id,
-      timestamp: now
+    const messageWithTimestamp = {
+      ...insertMessage,
+      timestamp: new Date()
     };
-    this.messages.set(id, message);
     
-    // Update the conversation's updatedAt time
-    const conversation = this.conversations.get(message.conversationId);
-    if (conversation) {
-      conversation.updatedAt = now;
-      this.conversations.set(conversation.id, conversation);
-    }
+    const [message] = await db
+      .insert(schema.messages)
+      .values(messageWithTimestamp)
+      .returning();
+    
+    // Update the conversation's updatedAt timestamp
+    await this.updateConversation(insertMessage.conversationId, { updatedAt: new Date() });
     
     return message;
   }
 
   // API key operations
   async getApiKeysByUserId(userId: number): Promise<ApiKey | undefined> {
-    return Array.from(this.apiKeys.values()).find(
-      (apiKey) => apiKey.userId === userId,
-    );
+    const [apiKey] = await db
+      .select()
+      .from(schema.apiKeys)
+      .where(eq(schema.apiKeys.userId, userId));
+    
+    return apiKey;
   }
 
   async createApiKey(insertApiKey: InsertApiKey): Promise<ApiKey> {
-    const id = this.apiKeyIdCounter++;
-    const apiKey: ApiKey = { ...insertApiKey, id };
-    this.apiKeys.set(id, apiKey);
+    const [apiKey] = await db
+      .insert(schema.apiKeys)
+      .values(insertApiKey)
+      .returning();
+    
     return apiKey;
   }
 
   async updateApiKey(userId: number, apiKeyData: Partial<ApiKey>): Promise<ApiKey | undefined> {
-    const apiKey = Array.from(this.apiKeys.values()).find(
-      (apiKey) => apiKey.userId === userId,
-    );
+    const existingApiKey = await this.getApiKeysByUserId(userId);
     
-    if (!apiKey) {
-      // If no API key exists for this user, create a new one
+    if (!existingApiKey) {
+      // Create a new API key if one doesn't exist
       return this.createApiKey({ 
         userId, 
-        ...apiKeyData 
+        ...apiKeyData as any 
       } as InsertApiKey);
     }
     
-    const updatedApiKey = { ...apiKey, ...apiKeyData };
-    this.apiKeys.set(apiKey.id, updatedApiKey);
+    const [updatedApiKey] = await db
+      .update(schema.apiKeys)
+      .set(apiKeyData)
+      .where(eq(schema.apiKeys.userId, userId))
+      .returning();
+    
     return updatedApiKey;
   }
 }
 
-export const storage = new MemStorage();
+// Use DatabaseStorage instead of MemStorage
+export const storage = new DatabaseStorage();

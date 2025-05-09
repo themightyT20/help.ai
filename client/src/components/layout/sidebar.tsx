@@ -3,7 +3,7 @@ import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Plus, LogOut, Settings, HelpCircle, Menu, Moon, Sun } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useAuth } from "@/lib/auth2";
+import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "next-themes";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";

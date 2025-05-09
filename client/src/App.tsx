@@ -7,7 +7,8 @@ import Login from "@/pages/auth/login";
 import { useEffect, useState } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
-import { AuthProvider } from "@/lib/auth2";
+import { AuthProvider } from "@/lib/auth-context";
+import { ProtectedRoute } from "@/lib/protected-route";
 
 function App() {
   const [isMounted, setIsMounted] = useState(false);
@@ -36,7 +37,7 @@ function App() {
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Chat} />
+      <ProtectedRoute path="/" component={Chat} />
       <Route path="/login" component={Login} />
       <Route component={NotFound} />
     </Switch>

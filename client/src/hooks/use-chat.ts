@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Message, Conversation } from "@shared/schema";
 import { createConversation, getConversation, sendMessage } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/lib/auth2";
+import { useAuth } from "@/lib/auth-context";
 
 type ChatMessage = {
   id?: number;

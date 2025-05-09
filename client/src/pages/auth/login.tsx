@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth-context";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),

@@ -5,7 +5,7 @@ import { ChatMessage } from "@/components/chat/chat-message";
 import { TypingIndicator } from "@/components/chat/typing-indicator";
 import { Sidebar } from "@/components/layout/sidebar";
 import { useChat } from "@/hooks/use-chat";
-import { useAuth } from "@/lib/auth2";
+import { useAuth } from "@/lib/auth-context";
 import { Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LoginModal } from "@/components/login-modal";

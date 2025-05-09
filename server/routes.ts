@@ -1,158 +1,26 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import session from "express-session";
-import passport from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { Strategy as DiscordStrategy } from "passport-discord";
-import { Strategy as LocalStrategy } from "passport-local";
-import bcrypt from "bcryptjs";
+
 import { z } from "zod";
-import { insertUserSchema, insertMessageSchema, insertConversationSchema } from "@shared/schema";
-import MemoryStore from "memorystore";
+import { insertConversationSchema } from "@shared/schema";
 import dotenv from "dotenv";
 import { initAuthRoutes } from "./api/auth";
 import { initChatRoutes } from "./api/chat";
 import { initSearchRoutes } from "./api/search";
 import { initCodeRoutes } from "./api/code";
 import { isAuthenticated } from "./middleware/auth";
+import { setupAuth } from "./auth";
 
 dotenv.config();
 
-// Initialize session store
-const SessionStore = MemoryStore(session);
+// Session store is handled in auth.ts
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   
-  // Session configuration
-  app.use(
-    session({
-      store: new SessionStore({
-        checkPeriod: 86400000, // 24 hours
-      }),
-      secret: process.env.SESSION_SECRET || "help-ai-session-secret",
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      },
-    })
-  );
-  
-  // Initialize Passport
-  app.use(passport.initialize());
-  app.use(passport.session());
-  
-  // Serialize & deserialize user
-  passport.serializeUser((user: any, done) => {
-    done(null, user.id);
-  });
-  
-  passport.deserializeUser(async (id: number, done) => {
-    try {
-      const user = await storage.getUser(id);
-      done(null, user);
-    } catch (err) {
-      done(err, null);
-    }
-  });
-  
-  // Local Strategy
-  passport.use(
-    new LocalStrategy(
-      { usernameField: "email" },
-      async (email, password, done) => {
-        try {
-          const user = await storage.getUserByEmail(email);
-          if (!user) {
-            return done(null, false, { message: "Incorrect email or password" });
-          }
-          
-          if (!user.password) {
-            return done(null, false, { message: "Please use OAuth to log in" });
-          }
-          
-          const isMatch = await bcrypt.compare(password, user.password);
-          if (!isMatch) {
-            return done(null, false, { message: "Incorrect email or password" });
-          }
-          
-          return done(null, user);
-        } catch (err) {
-          return done(err);
-        }
-      }
-    )
-  );
-  
-  // Google OAuth Strategy
-  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    passport.use(
-      new GoogleStrategy(
-        {
-          clientID: process.env.GOOGLE_CLIENT_ID,
-          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: "/api/auth/google/callback",
-        },
-        async (accessToken, refreshToken, profile, done) => {
-          try {
-            let user = await storage.getUserByProvider("google", profile.id);
-            
-            if (!user) {
-              // Create a new user
-              user = await storage.createUser({
-                username: profile.displayName || `user_${profile.id}`,
-                email: profile.emails?.[0]?.value,
-                profilePicture: profile.photos?.[0]?.value,
-                provider: "google",
-                providerId: profile.id,
-              });
-            }
-            
-            return done(null, user);
-          } catch (err) {
-            return done(err);
-          }
-        }
-      )
-    );
-  }
-  
-  // Discord OAuth Strategy
-  if (process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_SECRET) {
-    passport.use(
-      new DiscordStrategy(
-        {
-          clientID: process.env.DISCORD_CLIENT_ID,
-          clientSecret: process.env.DISCORD_CLIENT_SECRET,
-          callbackURL: "/api/auth/discord/callback",
-          scope: ["identify", "email"],
-        },
-        async (accessToken, refreshToken, profile, done) => {
-          try {
-            let user = await storage.getUserByProvider("discord", profile.id);
-            
-            if (!user) {
-              // Create a new user
-              user = await storage.createUser({
-                username: profile.username || `user_${profile.id}`,
-                email: profile.email,
-                profilePicture: `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`,
-                provider: "discord",
-                providerId: profile.id,
-              });
-            }
-            
-            return done(null, user);
-          } catch (err) {
-            return done(err);
-          }
-        }
-      )
-    );
-  }
+  // Setup authentication with Passport
+  setupAuth(app);
   
   // Initialize API routes
   initAuthRoutes(app);

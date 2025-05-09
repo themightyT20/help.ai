@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth2";
 
 interface LoginModalProps {
   onClose: () => void;
@@ -46,8 +46,35 @@ const registerSchema = z.object({
 
 export function LoginModal({ onClose }: LoginModalProps) {
   const [mode, setMode] = useState<"login" | "register">("login");
-  const { login, register } = useAuth();
   const { toast } = useToast();
+  
+  // Initialize with dummy functions that show the auth error
+  let login = async (_email: string, _password: string) => {
+    toast({
+      title: "Authentication error",
+      description: "Auth provider not available",
+      variant: "destructive",
+    });
+    return {} as any;
+  };
+  
+  let register = async (_username: string, _email: string, _password: string) => {
+    toast({
+      title: "Authentication error",
+      description: "Auth provider not available",
+      variant: "destructive",
+    });
+    return {} as any;
+  };
+  
+  // Try to get auth functions if context is available
+  try {
+    const auth = useAuth();
+    login = auth.login;
+    register = auth.register;
+  } catch (error) {
+    console.warn("Auth context not available in login modal:", error);
+  }
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),

@@ -1,11 +1,12 @@
-import { 
-  User, InsertUser, Conversation, InsertConversation, 
-  Message, InsertMessage, ApiKey, InsertApiKey 
-} from "@shared/schema";
 import session from "express-session";
 import { db, pool } from './db';
 import connectPg from 'connect-pg-simple';
 import { and, desc, eq } from 'drizzle-orm';
+import * as schema from '@shared/schema';
+import { 
+  User, InsertUser, Conversation, InsertConversation, 
+  Message, InsertMessage, ApiKey, InsertApiKey 
+} from "@shared/schema";
 
 export interface IStorage {
   // User operations
@@ -177,6 +178,11 @@ export class DatabaseStorage implements IStorage {
       timestamp: new Date()
     };
     
+    // Ensure metadata is present as null if not provided
+    if (messageWithTimestamp.metadata === undefined) {
+      messageWithTimestamp.metadata = null;
+    }
+    
     const [message] = await db
       .insert(schema.messages)
       .values(messageWithTimestamp)
@@ -199,9 +205,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createApiKey(insertApiKey: InsertApiKey): Promise<ApiKey> {
+    // Ensure API key fields are at least null if not provided
+    const apiKeyData = {
+      ...insertApiKey,
+      togetherApiKey: insertApiKey.togetherApiKey ?? null,
+      duckduckgoApiKey: insertApiKey.duckduckgoApiKey ?? null
+    };
+    
     const [apiKey] = await db
       .insert(schema.apiKeys)
-      .values(insertApiKey)
+      .values(apiKeyData)
       .returning();
     
     return apiKey;
@@ -214,7 +227,9 @@ export class DatabaseStorage implements IStorage {
       // Create a new API key if one doesn't exist
       return this.createApiKey({ 
         userId, 
-        ...apiKeyData as any 
+        ...apiKeyData,
+        togetherApiKey: apiKeyData.togetherApiKey ?? null, 
+        duckduckgoApiKey: apiKeyData.duckduckgoApiKey ?? null 
       } as InsertApiKey);
     }
     

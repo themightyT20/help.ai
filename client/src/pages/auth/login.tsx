@@ -87,7 +87,14 @@ export default function Login() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => handleOAuthLogin("google")}
+              onClick={() => {
+                toast({
+                  title: "Google authentication not configured",
+                  description: "Please use email/password login or register a new account",
+                  variant: "destructive"
+                });
+              }}
+              disabled
             >
               <FaGoogle className="mr-2 h-4 w-4 text-red-500" />
               Continue with Google
@@ -95,7 +102,14 @@ export default function Login() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => handleOAuthLogin("discord")}
+              onClick={() => {
+                toast({
+                  title: "Discord authentication not configured",
+                  description: "Please use email/password login or register a new account",
+                  variant: "destructive"
+                });
+              }}
+              disabled
             >
               <FaDiscord className="mr-2 h-4 w-4 text-indigo-500" />
               Continue with Discord

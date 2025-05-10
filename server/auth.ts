@@ -257,25 +257,43 @@ export function setupAuth(app: Express) {
     res.json(req.user);
   });
 
-  // Google OAuth routes
-  app.get("/api/auth/google", passport.authenticate("google"));
-  
-  app.get(
-    "/api/auth/google/callback",
-    passport.authenticate("google", {
-      successRedirect: "/",
-      failureRedirect: "/auth"
-    })
-  );
+  // Google OAuth routes - only configure if Google credentials are available
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    app.get("/api/auth/google", passport.authenticate("google"));
+    
+    app.get(
+      "/api/auth/google/callback",
+      passport.authenticate("google", {
+        successRedirect: "/",
+        failureRedirect: "/auth"
+      })
+    );
+  } else {
+    // Fallback for when Google OAuth is not configured
+    app.get("/api/auth/google", (req, res) => {
+      res.status(503).json({ 
+        message: "Google authentication is not configured. Please use email/password login."
+      });
+    });
+  }
 
-  // Discord OAuth routes
-  app.get("/api/auth/discord", passport.authenticate("discord"));
-  
-  app.get(
-    "/api/auth/discord/callback",
-    passport.authenticate("discord", {
-      successRedirect: "/",
-      failureRedirect: "/auth"
-    })
-  );
+  // Discord OAuth routes - only configure if Discord credentials are available
+  if (process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_SECRET) {
+    app.get("/api/auth/discord", passport.authenticate("discord"));
+    
+    app.get(
+      "/api/auth/discord/callback",
+      passport.authenticate("discord", {
+        successRedirect: "/",
+        failureRedirect: "/auth"
+      })
+    );
+  } else {
+    // Fallback for when Discord OAuth is not configured
+    app.get("/api/auth/discord", (req, res) => {
+      res.status(503).json({ 
+        message: "Discord authentication is not configured. Please use email/password login."
+      });
+    });
+  }
 }

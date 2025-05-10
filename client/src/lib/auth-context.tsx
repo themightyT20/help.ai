@@ -37,7 +37,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const login = async (email: string, password: string): Promise<User> => {
-    const response = await fetch('/api/login', {
+    const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -54,7 +54,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const register = async (username: string, email: string, password: string): Promise<User> => {
-    const response = await fetch('/api/register', {
+    const response = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, password }),

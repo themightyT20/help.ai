@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { FaGoogle, FaDiscord } from "react-icons/fa";
+import { Loader2 } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -131,14 +132,7 @@ export default function Login() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => {
-                toast({
-                  title: "Google authentication not configured",
-                  description: "Please use email/password login or register a new account",
-                  variant: "destructive"
-                });
-              }}
-              disabled
+              onClick={() => window.location.href = "/api/auth/google"}
             >
               <FaGoogle className="mr-2 h-4 w-4 text-red-500" />
               Continue with Google
@@ -147,13 +141,17 @@ export default function Login() {
               variant="outline"
               className="w-full"
               onClick={() => {
-                toast({
-                  title: "Discord authentication not configured",
-                  description: "Please use email/password login or register a new account",
-                  variant: "destructive"
-                });
+                // Check if Discord OAuth is configured
+                if (window.location.hostname.includes('replit.dev')) {
+                  toast({
+                    title: "Discord authentication requires setup",
+                    description: "Please provide DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET",
+                    variant: "destructive"
+                  });
+                } else {
+                  window.location.href = "/api/auth/discord";
+                }
               }}
-              disabled
             >
               <FaDiscord className="mr-2 h-4 w-4 text-indigo-500" />
               Continue with Discord
@@ -198,8 +196,15 @@ export default function Login() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full">
-                  Sign in
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    "Sign in"
+                  )}
                 </Button>
               </form>
             </Form>
@@ -262,8 +267,15 @@ export default function Login() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full">
-                  Create Account
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating Account...
+                    </>
+                  ) : (
+                    "Create Account"
+                  )}
                 </Button>
               </form>
             </Form>

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +24,16 @@ const loginSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
 });
 
+const registerSchema = z.object({
+  username: z.string().min(3, { message: "Username must be at least 3 characters" }),
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  confirmPassword: z.string(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
 export default function Login() {
   const [location, navigate] = useLocation();
   const { user, login, register, isLoading } = useAuth();
@@ -32,11 +42,22 @@ export default function Login() {
     location.includes("register") ? "register" : "login"
   );
 
-  const form = useForm<z.infer<typeof loginSchema>>({
+  // Create separate forms for login and register
+  const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
+    },
+  });
+
+  const registerForm = useForm<z.infer<typeof registerSchema>>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
     },
   });
 
@@ -47,7 +68,7 @@ export default function Login() {
     }
   }, [user, navigate]);
 
-  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+  const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
     try {
       await login(values.email, values.password);
       toast({
@@ -58,6 +79,23 @@ export default function Login() {
     } catch (error) {
       toast({
         title: "Login failed",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const onRegisterSubmit = async (values: z.infer<typeof registerSchema>) => {
+    try {
+      await register(values.username, values.email, values.password);
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created and you are now logged in",
+      });
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: "Registration failed",
         description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
@@ -79,9 +117,13 @@ export default function Login() {
     <div className="flex items-center justify-center min-h-screen p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Sign in to Help.ai</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            {mode === "login" ? "Sign in to Help.ai" : "Create an account"}
+          </CardTitle>
           <CardDescription className="text-center">
-            Enter your email and password to access your account
+            {mode === "login" 
+              ? "Enter your email and password to access your account" 
+              : "Fill out the form below to create a new account"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -127,50 +169,131 @@ export default function Login() {
             </div>
           </div>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="you@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full">
-                Sign in
-              </Button>
-            </form>
-          </Form>
+          {mode === "login" ? (
+            <Form {...loginForm}>
+              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                <FormField
+                  control={loginForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="you@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={loginForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full">
+                  Sign in
+                </Button>
+              </form>
+            </Form>
+          ) : (
+            <Form {...registerForm}>
+              <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                <FormField
+                  control={registerForm.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input placeholder="username" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={registerForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="you@example.com" 
+                          type="email" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={registerForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={registerForm.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full">
+                  Create Account
+                </Button>
+              </form>
+            </Form>
+          )}
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-center">
-            Don't have an account?{" "}
-            <Button
-              variant="link"
-              className="p-0 h-auto"
-              onClick={() => navigate("/register")}
-            >
-              Sign up
-            </Button>
+            {mode === "login" ? (
+              <div>
+                Don't have an account?{" "}
+                <Button
+                  variant="link"
+                  className="p-0 h-auto"
+                  onClick={() => setMode("register")}
+                >
+                  Sign up
+                </Button>
+              </div>
+            ) : (
+              <div>
+                Already have an account?{" "}
+                <Button
+                  variant="link"
+                  className="p-0 h-auto"
+                  onClick={() => setMode("login")}
+                >
+                  Sign in
+                </Button>
+              </div>
+            )}
           </div>
           <Button
             variant="link"

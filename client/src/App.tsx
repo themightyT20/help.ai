@@ -37,10 +37,18 @@ function App() {
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Chat} />
-      <Route path="/login" component={Login} />
-      <Route path="/register" component={Login} />  {/* Reuse Login component for register too */}
-      <Route component={NotFound} />
+      <Route path="/">
+        {() => <Chat />}
+      </Route>
+      <Route path="/login">
+        {() => <Login />}
+      </Route>
+      <Route path="/register">
+        {() => <Login />}
+      </Route>  {/* Reuse Login component for register too */}
+      <Route>
+        {() => <NotFound />}
+      </Route>
     </Switch>
   );
 }

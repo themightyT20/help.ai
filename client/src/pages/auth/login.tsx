@@ -129,14 +129,7 @@ export default function Login() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => window.location.href = "/api/auth/google"}
-            >
-              <FaGoogle className="mr-2 h-4 w-4 text-red-500" />
-              Continue with Google
-            </Button>
+            {/* Google auth removed as per user request */}
             <Button
               variant="outline"
               className="w-full"

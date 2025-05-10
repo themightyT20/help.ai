@@ -88,7 +88,12 @@ export function initChatRoutes(app: Express) {
       const data = await response.json();
       
       // Extract the AI's response
-      const aiResponse = data.choices[0].message.content;
+      const aiResponse = data.choices?.[0]?.message?.content;
+      
+      if (!aiResponse) {
+        console.error("Invalid response format from Together AI:", data);
+        return res.status(500).json({ message: "Invalid response format from AI model" });
+      }
       
       // Store the AI's message
       const assistantMessage = await storage.createMessage({

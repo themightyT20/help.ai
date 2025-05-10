@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { FaGoogle, FaDiscord } from "react-icons/fa";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -141,37 +140,20 @@ export function LoginModal({ onClose }: LoginModalProps) {
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
-          {/* OAuth Buttons */}
+          {/* Guest Access Button */}
           <div className="space-y-3">
             <Button
               variant="outline"
               className="w-full"
               onClick={() => {
                 toast({
-                  title: "Google authentication not configured",
-                  description: "Please use email/password login or register a new account",
-                  variant: "destructive"
+                  title: "Guest Mode Activated",
+                  description: "You are now using the app as a guest"
                 });
+                onClose();
               }}
-              disabled
             >
-              <FaGoogle className="mr-2 h-4 w-4 text-red-500" />
-              Continue with Google
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                toast({
-                  title: "Discord authentication not configured",
-                  description: "Please use email/password login or register a new account",
-                  variant: "destructive"
-                });
-              }}
-              disabled
-            >
-              <FaDiscord className="mr-2 h-4 w-4 text-indigo-500" />
-              Continue with Discord
+              Continue as Guest
             </Button>
           </div>
 
@@ -180,7 +162,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
               <Separator className="w-full" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-background px-2">Or</span>
+              <span className="bg-background px-2">Or Sign In</span>
             </div>
           </div>
 

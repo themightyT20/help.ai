@@ -37,8 +37,9 @@ function App() {
 function Router() {
   return (
     <Switch>
-      <ProtectedRoute path="/" component={Chat} />
+      <Route path="/" component={Chat} />
       <Route path="/login" component={Login} />
+      <Route path="/register" component={Login} />  {/* Reuse Login component for register too */}
       <Route component={NotFound} />
     </Switch>
   );

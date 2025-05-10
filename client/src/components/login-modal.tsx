@@ -128,9 +128,8 @@ export function LoginModal({ onClose }: LoginModalProps) {
     }
   };
 
-  const handleOAuthLogin = (provider: string) => {
-    window.location.href = `/api/auth/${provider}`;
-  };
+  // No longer redirecting to OAuth providers since they're not configured
+  // Instead, we'll show helpful messages as defined in the button onClick handlers
 
   return (
     <Dialog open={true} onOpenChange={onClose}>

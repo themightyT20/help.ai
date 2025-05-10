@@ -26,8 +26,11 @@ const loginSchema = z.object({
 
 export default function Login() {
   const [location, navigate] = useLocation();
-  const { user, login, isLoading } = useAuth();
+  const { user, login, register, isLoading } = useAuth();
   const { toast } = useToast();
+  const [mode, setMode] = useState<"login" | "register">(
+    location.includes("register") ? "register" : "login"
+  );
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -61,9 +64,8 @@ export default function Login() {
     }
   };
 
-  const handleOAuthLogin = (provider: string) => {
-    window.location.href = `/api/auth/${provider}`;
-  };
+  // No longer redirecting to OAuth providers since they're not configured
+  // Instead, we'll show helpful messages as defined in the button onClick handlers
 
   if (isLoading) {
     return (

@@ -10,23 +10,33 @@ import { Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LoginModal } from "@/components/login-modal";
 
-export default function Chat() {
+interface ChatProps {
+  user?: any;
+}
+
+export default function Chat(props: ChatProps = {}) {
   const [location, navigate] = useLocation();
   const search = useSearch();
   const params = new URLSearchParams(search);
   const conversationId = params.get("id") ? parseInt(params.get("id")!) : null;
 
-  // Try to get auth details, if auth context is available
-  let user = null;
+  // Get the user from props (passed by ProtectedRoute) and also try useAuth() as fallback
+  const { user: propsUser } = props;
+  
+  // Try to get auth details from context
+  let contextUser = null;
   let isAuthLoading = false;
   
   try {
     const auth = useAuth();
-    user = auth.user;
+    contextUser = auth.user;
     isAuthLoading = auth.isLoading;
   } catch (error) {
     console.warn("Auth context not available:", error);
   }
+  
+  // Use the user from props if available, otherwise use from context
+  const user = propsUser || contextUser;
   const {
     messages,
     isLoading: isChatLoading,

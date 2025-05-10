@@ -1,6 +1,6 @@
 import { useAuth } from '@/lib/auth-context';
 import { Loader2 } from 'lucide-react';
-import { useLocation, Route } from 'wouter';
+import { Route } from 'wouter';
 
 interface ProtectedRouteProps {
   path: string;
@@ -9,7 +9,6 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ path, component: Component }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
-  const [, navigate] = useLocation();
 
   return (
     <Route path={path}>
@@ -22,13 +21,8 @@ export function ProtectedRoute({ path, component: Component }: ProtectedRoutePro
           );
         }
 
-        if (!user) {
-          // Redirect to login page
-          navigate('/login');
-          return null;
-        }
-
-        return <Component />;
+        // Pass the user state to the component
+        return <Component user={user} />;
       }}
     </Route>
   );

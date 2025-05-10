@@ -66,11 +66,11 @@ export function initChatRoutes(app: Express) {
           "Authorization": `Bearer ${togetherApiKey}`
         },
         body: JSON.stringify({
-          model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
+          model: "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO",
           messages: [
             {
               role: "system",
-              content: "You are Help.ai, a helpful AI assistant powered by Mixtral 8x7b. You can assist with coding, answer questions, help with tasks, and provide accurate information. When generating code, include copy and download options. Always base your answers on accurate information and help the user to the best of your abilities."
+              content: "You are Help.ai, a helpful AI assistant powered by Nous-Hermes-2-Mixtral-8x7B-DPO. You can assist with coding, answer questions, help with tasks, and provide accurate information. When generating code, include copy and download options. Always base your answers on accurate information and help the user to the best of your abilities."
             },
             ...formattedHistory
           ],

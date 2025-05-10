@@ -144,7 +144,7 @@ export default function Chat(props: ChatProps = {}) {
                 </div>
                 <h1 className="text-2xl font-bold">Welcome to Help.ai</h1>
                 <p className="text-md text-gray-600 dark:text-gray-300 max-w-lg">
-                  Powered by Mixtral 8x7b, I can assist with coding, answer questions, search the web, 
+                  Powered by Nous-Hermes-2-Mixtral-8x7B-DPO, I can assist with coding, answer questions, search the web, 
                   and help with many other tasks. How can I help you today?
                 </p>
 

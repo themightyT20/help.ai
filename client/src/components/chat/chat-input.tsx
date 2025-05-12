@@ -53,18 +53,18 @@ export function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
 
   return (
     <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-background transition-colors duration-200">
-      <div className="max-w-3xl mx-auto">
-        <div className="relative">
+      <div className="max-w-3xl mx-auto px-4">
+        <div className="relative flex items-center">
           <Textarea
             ref={textareaRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Message Help.ai..."
-            className="w-full p-4 pr-24 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary resize-none min-h-[56px]"
+            className="w-full p-3 pr-24 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none min-h-[56px] shadow-sm"
             disabled={disabled}
           />
-          <div className="absolute right-2 bottom-2 flex items-center space-x-2">
+          <div className="absolute right-3 bottom-2 flex items-center space-x-2">
             <Button
               type="button"
               variant="ghost"
@@ -78,7 +78,7 @@ export function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
             <Button
               type="button"
               onClick={handleSubmit}
-              className="p-2 bg-primary text-white rounded-lg hover:bg-opacity-90 w-10 h-10 flex items-center justify-center"
+              className="p-2 bg-primary hover:bg-primary/90 text-white rounded-lg w-10 h-10 flex items-center justify-center"
               disabled={!message.trim() || disabled}
             >
               <SendIcon className="h-5 w-5" />

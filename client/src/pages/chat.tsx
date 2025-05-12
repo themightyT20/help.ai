@@ -144,9 +144,9 @@ export default function Chat(props: ChatProps = {}) {
           <div className="w-full max-w-3xl mx-auto space-y-6">
             {/* Welcome Screen */}
             {messages.length === 0 && !isLoading && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center space-y-6 text-center py-8 max-w-3xl mx-auto">
+              <div className="flex flex-col items-center justify-center h-full space-y-6 text-center pt-12 md:pt-24 px-4">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Welcome to Help.ai</h1>
-                <p className="text-md text-gray-800 dark:text-gray-200 max-w-lg">
+                <p className="text-md text-gray-800 dark:text-gray-200 max-w-lg mx-auto">
                   Powered by Nous-Hermes-2-Mixtral-8x7B-DPO, I can assist with coding, answer questions, search the web, 
                   and help with many other tasks. How can I help you today?
                 </p>
@@ -173,18 +173,20 @@ export default function Chat(props: ChatProps = {}) {
             )}
 
             {/* Chat Messages */}
-            {messages.map((message, index) => (
-              message.isLoading ? (
-                <TypingIndicator key={`loading-${index}`} />
-              ) : (
-                <ChatMessage 
-                  key={message.id || index}
-                  content={message.content}
-                  role={message.role}
-                  timestamp={message.timestamp}
-                />
-              )
-            ))}
+            <div className="pt-4">
+              {messages.map((message, index) => (
+                message.isLoading ? (
+                  <TypingIndicator key={`loading-${index}`} />
+                ) : (
+                  <ChatMessage 
+                    key={message.id || index}
+                    content={message.content}
+                    role={message.role}
+                    timestamp={message.timestamp}
+                  />
+                )
+              ))}
+            </div>
 
             {/* Loading Indicator */}
             {isLoading && messages.length === 0 && <TypingIndicator />}
@@ -195,10 +197,14 @@ export default function Chat(props: ChatProps = {}) {
         </div>
 
         {/* Chat Input */}
-        <ChatInput
-          onSendMessage={handleSendMessage}
-          disabled={isLoading}
-        />
+        <div className="border-t border-gray-200 dark:border-gray-800">
+          <div className="max-w-3xl mx-auto">
+            <ChatInput
+              onSendMessage={handleSendMessage}
+              disabled={isLoading}
+            />
+          </div>
+        </div>
       </main>
 
       {/* Login Modal */}

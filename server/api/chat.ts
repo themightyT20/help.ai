@@ -104,6 +104,24 @@ export function initChatRoutes(app: Express) {
         content: msg.content
       }));
 
+      // Get user memory if it exists (for registered users)
+      let userMemory = null;
+      if (!isGuestMode && userId) {
+        const user = await storage.getUser(userId);
+        userMemory = user?.memory || null;
+      }
+
+      // Build system message with memory context if available
+      let systemMessage = {
+        role: "system",
+        content: "You are Help.ai, a helpful AI assistant powered by Nous-Hermes-2-Mixtral-8x7B-DPO. You can assist with coding, answer questions, help with tasks, and provide accurate information. When generating code, include copy and download options. Always base your answers on accurate information and help the user to the best of your abilities."
+      };
+      
+      // Add memory context to system message if available
+      if (userMemory) {
+        systemMessage.content += `\n\nHere is some context from previous conversations with this user: ${JSON.stringify(userMemory)}`;
+      }
+
       // Call the Together AI API
       const response = await fetch("https://api.together.xyz/v1/chat/completions", {
         method: "POST",
@@ -114,10 +132,7 @@ export function initChatRoutes(app: Express) {
         body: JSON.stringify({
           model: "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO",
           messages: [
-            {
-              role: "system",
-              content: "You are Help.ai, a helpful AI assistant powered by Nous-Hermes-2-Mixtral-8x7B-DPO. You can assist with coding, answer questions, help with tasks, and provide accurate information. When generating code, include copy and download options. Always base your answers on accurate information and help the user to the best of your abilities."
-            },
+            systemMessage,
             ...formattedHistory
           ],
           temperature: 0.7,
@@ -162,6 +177,35 @@ export function initChatRoutes(app: Express) {
         });
       }
 
+      // For registered users, update memory with context from this conversation
+      if (!isGuestMode && userId) {
+        try {
+          const user = await storage.getUser(userId);
+          if (user) {
+            // Initialize memory if it doesn't exist
+            let memory: any = user.memory || {};
+            if (!memory) memory = {};
+            if (!Array.isArray(memory.conversations)) memory.conversations = [];
+            
+            // Create a basic summary of this conversation
+            const currentContext = {
+              lastInteraction: new Date().toISOString(),
+              topic: message.substring(0, 100), // Use start of message as topic indicator
+              response: aiResponse.substring(0, 200), // Brief summary of the response
+            };
+            
+            // Add to or update memory
+            memory.conversations = [...memory.conversations, currentContext].slice(-10); // Keep last 10 interactions
+            
+            // Update user's memory
+            await storage.updateUser(userId, { memory });
+          }
+        } catch (error) {
+          console.error("Failed to update user memory:", error);
+          // Continue without memory update if it fails
+        }
+      }
+      
       // Return both messages
       res.json({
         userMessage,
@@ -180,7 +224,7 @@ export function initChatRoutes(app: Express) {
     if (!req.user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    const conversations = await storage.getConversations(req.user.id);
+    const conversations = await storage.getConversationsByUserId(req.user.id);
     res.json(conversations);
   });
 }

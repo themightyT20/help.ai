@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -26,7 +26,7 @@ interface LoginModalProps {
 
 export function LoginModal({ onClose }: LoginModalProps) {
   const [isGuest, setIsGuest] = useState(false);
-  const { login, signup } = useAuth();
+  const { user, login, register, loginAsGuest } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
@@ -41,6 +41,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
   });
 
   const handleContinueAsGuest = async () => {
+    loginAsGuest();
     localStorage.setItem('guest-mode', 'true');
     onClose();
     setLocation('/');
@@ -48,7 +49,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
 
   const onSubmit = async (values: z.infer<typeof signupSchema>) => {
     try {
-      await signup(values);
+      await register(values.username, values.email, values.password);
       toast({
         title: "Success",
         description: "Account created successfully",
@@ -93,8 +94,14 @@ export function LoginModal({ onClose }: LoginModalProps) {
               name="username"
               render={({ field }) => (
                 <FormItem>
+                  <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="Username" {...field} />
+                    <Input 
+                      placeholder="Username" 
+                      type="text" 
+                      autoComplete="username"
+                      {...field} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -106,8 +113,14 @@ export function LoginModal({ onClose }: LoginModalProps) {
               name="email"
               render={({ field }) => (
                 <FormItem>
+                  <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="Email" type="email" {...field} />
+                    <Input 
+                      placeholder="Email" 
+                      type="email" 
+                      autoComplete="email"
+                      {...field} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -119,8 +132,14 @@ export function LoginModal({ onClose }: LoginModalProps) {
               name="password"
               render={({ field }) => (
                 <FormItem>
+                  <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="Password" type="password" {...field} />
+                    <Input 
+                      placeholder="Password" 
+                      type="password" 
+                      autoComplete="new-password"
+                      {...field} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -132,8 +151,14 @@ export function LoginModal({ onClose }: LoginModalProps) {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
+                  <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="Confirm Password" type="password" {...field} />
+                    <Input 
+                      placeholder="Confirm Password" 
+                      type="password" 
+                      autoComplete="new-password"
+                      {...field} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

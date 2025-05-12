@@ -122,13 +122,8 @@ export function initChatRoutes(app: Express) {
         systemMessage.content += `\n\nHere is some context from previous conversations with this user: ${JSON.stringify(userMemory)}`;
       }
 
-      // Get API keys from environment variables
+      // Get Stability API key from environment variables
       const stabilityApiKey = process.env.STABILITY_API_KEY;
-      const togetherApiKey = process.env.TOGETHER_API_KEY;
-
-      if (!togetherApiKey) {
-        return res.status(400).json({ message: "Together API key not configured" });
-      }
 
       // Call the Together AI API
       const response = await fetch("https://api.together.xyz/v1/chat/completions", {

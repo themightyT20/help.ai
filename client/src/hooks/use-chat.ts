@@ -103,20 +103,24 @@ export function useChat() {
         // Remove loading message
         newMessages.pop();
         
-        // Add the real messages from the API
-        newMessages.push({
-          id: response.userMessage.id,
-          content: response.userMessage.content,
-          role: "user",
-          timestamp: new Date(response.userMessage.timestamp),
-        });
+        // Check if message already exists to prevent duplicates
+        if (!newMessages.some(msg => msg.id === response.userMessage.id)) {
+          newMessages.push({
+            id: response.userMessage.id,
+            content: response.userMessage.content,
+            role: "user",
+            timestamp: new Date(response.userMessage.timestamp),
+          });
+        }
         
-        newMessages.push({
-          id: response.assistantMessage.id,
-          content: response.assistantMessage.content,
-          role: "assistant",
-          timestamp: new Date(response.assistantMessage.timestamp),
-        });
+        if (!newMessages.some(msg => msg.id === response.assistantMessage.id)) {
+          newMessages.push({
+            id: response.assistantMessage.id,
+            content: response.assistantMessage.content,
+            role: "assistant",
+            timestamp: new Date(response.assistantMessage.timestamp),
+          });
+        }
         
         return newMessages;
       });

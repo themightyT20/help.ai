@@ -79,6 +79,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const logout = async (): Promise<void> => {
+    // Clear guest mode if active
+    localStorage.removeItem('guest-mode');
+    
     await fetch('/api/logout', {
       method: 'POST',
     });

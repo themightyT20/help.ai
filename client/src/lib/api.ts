@@ -6,11 +6,21 @@ async function apiRequest<T>(
   endpoint: string,
   data?: any
 ): Promise<T> {
+  // Check if we're in guest mode
+  const isGuestMode = localStorage.getItem('guest-mode') === 'true';
+  
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  
+  // Add guest mode header if applicable
+  if (isGuestMode) {
+    headers["x-guest-mode"] = "true";
+  }
+
   const response = await fetch(`/api${endpoint}`, {
     method,
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
     credentials: "include",
     body: data ? JSON.stringify(data) : undefined,
   });

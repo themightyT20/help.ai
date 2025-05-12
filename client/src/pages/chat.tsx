@@ -144,7 +144,7 @@ export default function Chat(props: ChatProps = {}) {
           <div className="w-full max-w-3xl mx-auto space-y-6">
             {/* Welcome Screen */}
             {messages.length === 0 && !isLoading && (
-              <div className="flex flex-col items-center justify-center space-y-6 h-full text-center py-8 max-w-3xl mx-auto">
+              <div className="absolute inset-0 flex flex-col items-center justify-center space-y-6 text-center py-8 max-w-3xl mx-auto">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Welcome to Help.ai</h1>
                 <p className="text-md text-gray-800 dark:text-gray-200 max-w-lg">
                   Powered by Nous-Hermes-2-Mixtral-8x7B-DPO, I can assist with coding, answer questions, search the web, 

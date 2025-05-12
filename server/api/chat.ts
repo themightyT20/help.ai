@@ -124,10 +124,7 @@ export function initChatRoutes(app: Express) {
 
       // Get API keys from environment or user config
       const stabilityApiKey = process.env.STABILITY_API_KEY;
-      const togetherApiKey = apiKeys?.togetherApiKey || process.env.TOGETHER_AI_API_KEY;
-
-      // Get Stability API key from environment variables
-      // const stabilityApiKey = process.env.STABILITY_API_KEY;
+      // Note: togetherApiKey is already defined above
 
       // Call the Together AI API
       const response = await fetch("https://api.together.xyz/v1/chat/completions", {

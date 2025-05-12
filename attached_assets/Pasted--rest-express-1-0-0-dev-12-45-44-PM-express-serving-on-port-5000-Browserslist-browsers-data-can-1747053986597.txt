@@ -1,0 +1,40 @@
+> rest-express@1.0.0 dev
+12:45:44 PM [express] serving on port 5000
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+12:45:48 PM [express] GET /api/user 401 in 3ms :: {"message":"Unauthorized"}
+12:45:57 PM [express] GET /api/conversations 200 in 236ms :: []
+12:45:57 PM [express] POST /api/conversations 201 in 243ms :: {"id":1747053957254,"userId":0,"title":…
+12:45:57 PM [express] GET /api/conversations/1747053957254 200 in 257ms :: {"conversation":{"id":1747…
+Chat API error: TypeError: Cannot read properties of undefined (reading 'id')
+    at <anonymous> (/home/runner/workspace/server/api/chat.ts:18:40)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+    at isAuthenticated (/home/runner/workspace/server/middleware/auth.ts:8:12)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at strategy.pass (/home/runner/workspace/node_modules/passport/lib/middleware/authenticate.js:355:9)
+    at SessionStrategy.authenticate (/home/runner/workspace/node_modules/passport/lib/strategies/session.js:126:10)
+    at attempt (/home/runner/workspace/node_modules/passport/lib/middleware/authenticate.js:378:16)
+    at authenticate (/home/runner/workspace/node_modules/passport/lib/middleware/authenticate.js:379:7)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at initialize (/home/runner/workspace/node_modules/passport/lib/middleware/initialize.js:98:5)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at /home/runner/workspace/node_modules/express-session/index.js:514:7
+    at /home/runner/workspace/node_modules/connect-pg-simple/index.js:367:29
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+12:46:07 PM [express] POST /api/chat 500 in 251ms :: {"message":"Failed to process message"}

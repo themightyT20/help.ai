@@ -74,15 +74,28 @@ export function initChatRoutes(app: Express) {
       // Get user's API key or use default
       const apiKeys = isGuestMode ? null : await storage.getApiKeysByUserId(userId);
       
-      // Use API key or fallback to environment variable
-      const togetherApiKey = apiKeys?.togetherApiKey || 
-                            process.env.TOGETHER_AI_API_KEY || 
-                            "";
+      // For guest mode, we'll always try to use the environment variable
+      let togetherApiKey;
       
-      if (!togetherApiKey) {
-        return res.status(400).json({ 
-          message: "No Together AI API key found. Please add an API key in settings."
-        });
+      if (isGuestMode) {
+        // For guest users, only use the environment variable
+        togetherApiKey = process.env.TOGETHER_AI_API_KEY || "";
+        
+        // If no key is available, provide a friendly message
+        if (!togetherApiKey) {
+          return res.status(400).json({ 
+            message: "No API key available for guest users. Please log in and add your own API key in settings."
+          });
+        }
+      } else {
+        // For registered users, use their key or fallback to environment variable
+        togetherApiKey = apiKeys?.togetherApiKey || process.env.TOGETHER_AI_API_KEY || "";
+        
+        if (!togetherApiKey) {
+          return res.status(400).json({ 
+            message: "No Together AI API key found. Please add an API key in settings."
+          });
+        }
       }
       
       // Format conversation history for the AI model

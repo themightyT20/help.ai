@@ -206,10 +206,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
                       <FormControl>
                         <Input 
                           type="password" 
-                          value={field.value}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
-                          name={field.name}
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -238,10 +235,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
                         <Input
                           placeholder="username"
                           className="bg-white dark:bg-gray-950"
-                          value={field.value}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
-                          name={field.name}
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -276,10 +270,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
                       <FormControl>
                         <Input 
                           type="password" 
-                          value={field.value}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
-                          name={field.name}
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -296,10 +287,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
                       <FormControl>
                         <Input 
                           type="password" 
-                          value={field.value}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
-                          name={field.name}
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />

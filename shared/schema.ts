@@ -11,6 +11,7 @@ export const users = pgTable("users", {
   profilePicture: text("profile_picture"),
   provider: text("provider"), // "google", "discord", or "local"
   providerId: text("provider_id"), // OAuth provider ID
+  memory: jsonb("memory"), // Store conversation memory/context
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({

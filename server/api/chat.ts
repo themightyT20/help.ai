@@ -181,6 +181,7 @@ export function initChatRoutes(app: Express) {
       return res.status(401).json({ message: "Unauthorized" });
     }
     const conversations = await storage.getConversations(req.user.id);
+    res.json(conversations);
   });
 }
 ```

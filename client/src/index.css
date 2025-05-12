@@ -24,12 +24,12 @@
     --destructive-foreground: 0 0% 100%;
     --ring: 0 0% 0%;
     --radius: 0.5rem;
-    
+
     --lightBg: 0 0% 100%;
     --darkBg: 0 0% 0%;
     --lightChat: 0 0% 96%;
     --darkChat: 0 0% 10%;
-    
+
     --sidebar-background: 0 0% 96%;
     --sidebar-foreground: 0 0% 0%;
     --sidebar-primary: 0 0% 0%;
@@ -39,7 +39,7 @@
     --sidebar-border: 0 0% 90%;
     --sidebar-ring: 0 0% 0%;
   }
- 
+
   .dark {
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
@@ -60,12 +60,12 @@
     --destructive: 0 0% 50%;
     --destructive-foreground: 0 0% 100%;
     --ring: 0 0% 80%;
-    
+
     --lightBg: 0 0% 100%;
     --darkBg: 0 0% 0%;
     --lightChat: 0 0% 96%;
     --darkChat: 0 0% 15%;
-    
+
     --sidebar-background: 0 0% 5%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 0 0% 100%;
@@ -81,7 +81,7 @@
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply font-sans antialiased bg-background text-foreground overflow-x-hidden;
   }
@@ -153,4 +153,36 @@
 
 .dark .code-block::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+.example-card {
+  background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8));
+  border: 1px solid rgba(100, 116, 139, 0.2);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.example-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: rgba(100, 116, 139, 0.4);
+}
+
+.example-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #f8fafc;
+}
+
+.example-description {
+  font-size: 0.875rem;
+  color: #cbd5e1;
+  line-height: 1.5;
 }

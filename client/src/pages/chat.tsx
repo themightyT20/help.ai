@@ -124,7 +124,7 @@ export default function Chat(props: ChatProps = {}) {
     },
     {
       title: "Project assistance",
-      prompt: "Help me design a database schema for a task management app",
+      prompt: "Help me design a database schema for a task manager",
     },
     {
       title: "Creative writing",
@@ -157,7 +157,7 @@ export default function Chat(props: ChatProps = {}) {
                     <Button
                       key={index}
                       variant="outline"
-                      className="h-full py-5 px-5 w-full bg-slate-800 text-left hover:bg-slate-700 transition-colors border border-slate-700 text-white flex flex-col rounded-md"
+                      className="flex flex-col h-auto py-4 px-4 bg-[#1e2738] text-left hover:bg-[#222c3c] border border-[#2a344a] text-white rounded-md overflow-hidden"
                       onClick={() => handleSendMessage(example.prompt)}
                     >
                       <div className="flex flex-col items-start w-full">

@@ -44,7 +44,7 @@ interface SettingsModalProps {
 
 const apiKeysSchema = z.object({
   togetherApiKey: z.string().optional(),
-  duckduckgoApiKey: z.string().optional(),
+  stabilityApiKey: z.string().optional(),
 });
 
 export function SettingsModal({ onClose }: SettingsModalProps) {
@@ -52,9 +52,9 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("general");
   const [showTogetherApiKey, setShowTogetherApiKey] = useState(false);
-  const [showDuckduckgoApiKey, setShowDuckduckgoApiKey] = useState(false);
+  const [showStabilityApiKey, setShowStabilityApiKey] = useState(false);
   const [hasTogetherApiKey, setHasTogetherApiKey] = useState(false);
-  const [hasDuckduckgoApiKey, setHasDuckduckgoApiKey] = useState(false);
+  const [hasStabilityApiKey, setHasStabilityApiKey] = useState(false);
 
   // Load settings from local storage
   const userSettings = loadSettings();
@@ -70,7 +70,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     resolver: zodResolver(apiKeysSchema),
     defaultValues: {
       togetherApiKey: "",
-      duckduckgoApiKey: "",
+      stabilityApiKey: "",
     },
   });
 

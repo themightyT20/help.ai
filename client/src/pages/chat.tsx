@@ -78,7 +78,10 @@ export default function Chat(props: ChatProps = {}) {
   }, [conversationId, user, isAuthLoading]);
 
   const handleSendMessage = async (content: string) => {
-    if (!user) {
+    // Check if user is logged in or in guest mode
+    const isGuestMode = localStorage.getItem('guest-mode') === 'true';
+    
+    if (!user && !isGuestMode) {
       setShowLoginModal(true);
       return;
     }
@@ -130,20 +133,20 @@ export default function Chat(props: ChatProps = {}) {
     <>
       <Sidebar onNewChat={handleNewChat} currentConversationId={conversationId || undefined} />
 
-      <main className="lg:ml-64 transition-all duration-300 flex flex-col h-screen">
+      <main className="lg:ml-64 transition-all duration-300 flex flex-col h-screen bg-white dark:bg-black">
         <div
           id="chat-container"
-          className="flex-1 overflow-y-auto px-4 py-6 md:px-8"
+          className="flex-1 overflow-y-auto px-4 py-6 md:px-8 flex justify-center"
         >
-          <div className="max-w-3xl mx-auto space-y-6">
+          <div className="w-full max-w-3xl mx-auto space-y-6">
             {/* Welcome Screen */}
             {messages.length === 0 && !isLoading && (
-              <div className="flex flex-col items-center justify-center space-y-6 h-full text-center py-8">
-                <div className="w-24 h-24 rounded-full bg-primary bg-opacity-10 flex items-center justify-center">
-                  <Bot className="h-12 w-12 text-primary" />
+              <div className="flex flex-col items-center justify-center space-y-6 h-full text-center py-8 max-w-3xl mx-auto">
+                <div className="w-24 h-24 rounded-full border-2 border-gray-800 dark:border-gray-200 flex items-center justify-center">
+                  <Bot className="h-12 w-12 text-gray-800 dark:text-gray-200" />
                 </div>
-                <h1 className="text-2xl font-bold">Welcome to Help.ai</h1>
-                <p className="text-md text-gray-600 dark:text-gray-300 max-w-lg">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Welcome to Help.ai</h1>
+                <p className="text-md text-gray-800 dark:text-gray-200 max-w-lg">
                   Powered by Nous-Hermes-2-Mixtral-8x7B-DPO, I can assist with coding, answer questions, search the web, 
                   and help with many other tasks. How can I help you today?
                 </p>
@@ -154,7 +157,7 @@ export default function Chat(props: ChatProps = {}) {
                     <Button
                       key={index}
                       variant="outline"
-                      className="h-auto p-4 bg-[hsl(var(--lightChat))] dark:bg-[hsl(var(--darkChat))] rounded-lg text-left hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                      className="h-auto p-4 bg-white dark:bg-gray-800 rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-gray-300 dark:border-gray-700"
                       onClick={() => handleSendMessage(example.prompt)}
                     >
                       <div className="flex flex-col items-start">

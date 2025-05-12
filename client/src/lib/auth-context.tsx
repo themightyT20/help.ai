@@ -13,38 +13,34 @@ interface AuthContextType {
   refetchUser: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export function AuthProvider({ children }: AuthProviderProps) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  
-  // Check if guest mode is enabled
-  const isGuestMode = localStorage.getItem('guest-mode') === 'true';
-  
-  const { 
-    data: user, 
-    isLoading: apiIsLoading, 
-    error, 
-    refetch 
-  } = useQuery({ 
-    queryKey: ['/api/user'],
+
+  // Fetch current user 
+  const { data: user, isLoading, error, refetch } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const headers: Record<string, string> = {};
+      if (localStorage.getItem('guest-mode') === 'true') {
+        headers['x-guest-mode'] = 'true';
+      }
+      const response = await fetch('/api/me', { headers });
+      if (!response.ok) {
+        throw new Error('Failed to fetch user');
+      }
+      return response.json();
+    },
     retry: false,
     staleTime: 1000 * 60 * 60, // 1 hour
-    enabled: !isGuestMode // Only run the query if not in guest mode
   });
-  
-  // If in guest mode, we're never loading
-  const isLoading = isGuestMode ? false : apiIsLoading;
 
   const refetchUser = async () => {
     await refetch();
   };
 
-  const login = async (email: string, password: string): Promise<User> => {
+  const login = async (email: string, password: string) => {
     const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -52,8 +48,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Login failed');
+      const error = await response.json();
+      throw new Error(error.message || 'Login failed');
     }
 
     const userData = await response.json();
@@ -61,7 +57,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return userData;
   };
 
-  const register = async (username: string, email: string, password: string): Promise<User> => {
+  const register = async (username: string, email: string, password: string) => {
     const response = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -69,8 +65,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Registration failed');
+      const error = await response.json();
+      throw new Error(error.message || 'Registration failed');
     }
 
     const userData = await response.json();
@@ -78,53 +74,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return userData;
   };
 
-  const logout = async (): Promise<void> => {
-    // Clear guest mode if active
-    localStorage.removeItem('guest-mode');
-    
-    await fetch('/api/logout', {
-      method: 'POST',
-    });
-    
-    queryClient.invalidateQueries();
-    await refetchUser();
-  };
-  
   const loginAsGuest = () => {
-    // Guest mode just bypasses authentication
     localStorage.setItem('guest-mode', 'true');
+    refetchUser();
   };
 
-  // Create a mock user for guest mode
-  const guestUser = isGuestMode ? {
-    id: 0,
-    username: 'Guest',
-    email: 'guest@example.com',
-    password: null,
-    profilePicture: null,
-    provider: null,
-    providerId: null
-  } as User : null;
-  
-  const value = useMemo<AuthContextType>(() => ({
-    user: isGuestMode ? guestUser : (user as User | null),
+  const logout = async () => {
+    localStorage.removeItem('guest-mode');
+    await fetch('/api/auth/logout', { method: 'POST' });
+    queryClient.clear();
+    await refetchUser();
+  };
+
+  const value = {
+    user: user as User | null,
     isLoading,
     error: error as Error | null,
     login,
     register,
     loginAsGuest,
     logout,
-    refetchUser
-  }), [user, isLoading, error, refetch, isGuestMode, guestUser]);
+    refetchUser,
+  };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth(): AuthContextType {
+export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');

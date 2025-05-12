@@ -56,6 +56,15 @@ export function useChat() {
   const startNewConversation = useCallback(async (initialTitle = "New Conversation") => {
     try {
       setIsLoading(true);
+      
+      // Add the x-guest-mode header if in guest mode
+      const isGuestMode = localStorage.getItem('guest-mode') === 'true';
+      const headers: Record<string, string> = {};
+      
+      if (isGuestMode) {
+        headers['x-guest-mode'] = 'true';
+      }
+      
       const newConversation = await createConversation(initialTitle);
       setConversation(newConversation);
       setMessages([]);
@@ -94,7 +103,16 @@ export function useChat() {
     setMessages(prev => [...prev, userMessage, loadingMessage]);
 
     try {
-      const response = await sendMessage(content, conversation.id);
+      // Add the x-guest-mode header if in guest mode
+      const isGuestMode = localStorage.getItem('guest-mode') === 'true';
+      
+      // Send message with guest mode header if needed
+      let apiHeaders = {};
+      if (isGuestMode) {
+        apiHeaders = { 'x-guest-mode': 'true' };
+      }
+      
+      const response = await sendMessage(content, conversation.id, apiHeaders);
       
       // Update messages with real data
       setMessages(prev => {

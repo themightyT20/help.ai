@@ -40,9 +40,8 @@ export function LoginModal({ onClose }: LoginModalProps) {
     }
   });
 
-  const handleContinueAsGuest = async () => {
+  const handleContinueAsGuest = () => {
     loginAsGuest();
-    localStorage.setItem('guest-mode', 'true');
     onClose();
     setLocation('/');
   };

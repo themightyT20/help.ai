@@ -157,12 +157,12 @@ export default function Chat(props: ChatProps = {}) {
                     <Button
                       key={index}
                       variant="outline"
-                      className="h-auto p-4 w-full bg-white dark:bg-gray-800 rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-gray-300 dark:border-gray-700"
+                      className="h-auto p-4 w-full bg-slate-800 text-left hover:bg-slate-700 transition-colors border border-slate-700 overflow-hidden text-white"
                       onClick={() => handleSendMessage(example.prompt)}
                     >
                       <div className="flex flex-col items-start w-full">
                         <div className="font-medium mb-1">{example.title}</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-300">
+                        <div className="text-sm text-gray-300 break-words line-clamp-2">
                           {example.prompt}
                         </div>
                       </div>

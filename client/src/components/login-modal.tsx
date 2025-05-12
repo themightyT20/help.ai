@@ -1,333 +1,150 @@
 import { useState } from "react";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "wouter";
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth-context";
+
+const signupSchema = z.object({
+  username: z.string().min(3).max(20),
+  email: z.string().email(),
+  password: z.string().min(6),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 interface LoginModalProps {
   onClose: () => void;
 }
 
-const loginSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-});
-
-const registerSchema = z.object({
-  username: z.string().min(3, { message: "Username must be at least 3 characters" }),
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z
-    .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
-  confirmPassword: z.string(),
-}).refine(data => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
-
 export function LoginModal({ onClose }: LoginModalProps) {
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [isGuest, setIsGuest] = useState(false);
+  const { login, signup } = useAuth();
   const { toast } = useToast();
+  const [, navigate] = useNavigate();
 
-  // Initialize with dummy functions that show the auth error
-  let login = async (_email: string, _password: string) => {
-    toast({
-      title: "Authentication error",
-      description: "Auth provider not available",
-      variant: "destructive",
-    });
-    return {} as any;
-  };
-
-  let register = async (_username: string, _email: string, _password: string) => {
-    toast({
-      title: "Authentication error",
-      description: "Auth provider not available",
-      variant: "destructive",
-    });
-    return {} as any;
-  };
-
-  let loginAsGuest = () => {
-    toast({
-      title: "Guest mode activated",
-      description: "You are now using the app as a guest",
-    });
-    localStorage.setItem('guest-mode', 'true');
-  };
-
-  // Try to get auth functions if context is available
-  try {
-    const auth = useAuth();
-    login = auth.login;
-    register = auth.register;
-    loginAsGuest = auth.loginAsGuest;
-  } catch (error) {
-    console.warn("Auth context not available in login modal:", error);
-  }
-
-  const loginForm = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  const registerForm = useForm<z.infer<typeof registerSchema>>({
-    resolver: zodResolver(registerSchema),
+  const form = useForm({
+    resolver: zodResolver(signupSchema),
     defaultValues: {
       username: "",
       email: "",
       password: "",
-      confirmPassword: "",
-    },
+      confirmPassword: ""
+    }
   });
 
-  const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
+  const handleContinueAsGuest = async () => {
+    localStorage.setItem('guest-mode', 'true');
+    onClose();
+    navigate('/');
+  };
+
+  const onSubmit = async (values: z.infer<typeof signupSchema>) => {
     try {
-      await login(values.email, values.password);
+      await signup(values);
       toast({
-        title: "Login successful",
-        description: "You have been logged in",
+        title: "Success",
+        description: "Account created successfully",
       });
       onClose();
+      navigate('/');
     } catch (error) {
       toast({
-        title: "Login failed",
-        description: error instanceof Error ? error.message : "An error occurred",
+        title: "Error",
+        description: "Failed to create account",
         variant: "destructive",
       });
     }
   };
-
-  const onRegisterSubmit = async (values: z.infer<typeof registerSchema>) => {
-    try {
-      await register(values.username, values.email, values.password);
-      toast({
-        title: "Registration successful",
-        description: "Your account has been created and you are now logged in",
-      });
-      onClose();
-    } catch (error) {
-      toast({
-        title: "Registration failed",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // No longer redirecting to OAuth providers since they're not configured
-  // Instead, we'll show helpful messages as defined in the button onClick handlers
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-black">
+    <Dialog open onOpenChange={() => onClose()}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-center">
-            {mode === "login" ? "Sign in to Help.ai" : "Sign up for Help.ai"}
-          </DialogTitle>
+          <DialogTitle>Sign up for Help.ai</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4">
-          {/* Guest Access Button */}
-          <div className="space-y-3">
-            <Button
-              variant="outline"
-              className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black hover:bg-gray-100 dark:hover:bg-gray-900"
-              onClick={() => {
-                loginAsGuest();
-                onClose();
-              }}
-            >
-              Continue as Guest
-            </Button>
+        <Button variant="outline" className="w-full" onClick={handleContinueAsGuest}>
+          Continue as Guest
+        </Button>
+
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
           </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <Separator className="w-full" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-background px-2">Or Sign In</span>
-            </div>
-          </div>
-
-          {/* Login Form */}
-          {mode === "login" ? (
-            <Form {...loginForm}>
-              <form
-                onSubmit={loginForm.handleSubmit(onLoginSubmit)}
-                className="space-y-4"
-              >
-                <FormField
-                  control={loginForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="you@example.com"
-                          type="email"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={loginForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password" 
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button type="submit" className="w-full">
-                  Sign in
-                </Button>
-              </form>
-            </Form>
-          ) : (
-            <Form {...registerForm}>
-              <form
-                onSubmit={registerForm.handleSubmit(onRegisterSubmit)}
-                className="space-y-4"
-              >
-                <FormField
-                  control={registerForm.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Username</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="username"
-                          className="bg-white dark:bg-gray-950"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={registerForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="you@example.com"
-                          type="email"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={registerForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password" 
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={registerForm.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password" 
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button type="submit" className="w-full">
-                  Create Account
-                </Button>
-              </form>
-            </Form>
-          )}
-
-          <div className="text-center text-sm">
-            {mode === "login" ? (
-              <div>
-                Don't have an account?{" "}
-                <Button
-                  variant="link"
-                  className="p-0 h-auto"
-                  onClick={() => setMode("register")}
-                >
-                  Sign up
-                </Button>
-              </div>
-            ) : (
-              <div>
-                Already have an account?{" "}
-                <Button
-                  variant="link"
-                  className="p-0 h-auto"
-                  onClick={() => setMode("login")}
-                >
-                  Sign in
-                </Button>
-              </div>
-            )}
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Or Sign In
+            </span>
           </div>
         </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder="Username" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder="Email" type="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder="Password" type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder="Confirm Password" type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="w-full">
+              Create Account
+            </Button>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

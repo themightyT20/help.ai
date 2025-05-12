@@ -45,6 +45,7 @@ export const messages = pgTable("messages", {
   role: text("role").notNull(), // "user" or "assistant"
   timestamp: timestamp("timestamp").notNull().defaultNow(),
   metadata: jsonb("metadata"), // For storing additional data like source URLs, code download links, etc.
+  memory: jsonb("memory"), // For storing conversation context and memory
 });
 
 export const insertMessageSchema = createInsertSchema(messages).pick({

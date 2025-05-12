@@ -60,13 +60,13 @@ export const apiKeys = pgTable("api_keys", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
   togetherApiKey: text("together_api_key"),
-  duckduckgoApiKey: text("duckduckgo_api_key"),
+  stabilityApiKey: text("stability_api_key"),
 });
 
 export const insertApiKeySchema = createInsertSchema(apiKeys).pick({
   userId: true,
   togetherApiKey: true,
-  duckduckgoApiKey: true,
+  stabilityApiKey: true,
 });
 
 // Types

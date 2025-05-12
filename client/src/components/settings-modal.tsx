@@ -80,7 +80,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
       getApiKeysStatus()
         .then((data) => {
           setHasTogetherApiKey(data.hasTogetherApiKey);
-          setHasDuckduckgoApiKey(data.hasDuckduckgoApiKey);
+          setHasStabilityApiKey(data.hasStabilityApiKey);
         })
         .catch((error) => {
           console.error("Failed to get API key status:", error);
@@ -117,15 +117,15 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     try {
       const result = await saveApiKeys(
         values.togetherApiKey || undefined,
-        values.duckduckgoApiKey || undefined
+        values.stabilityApiKey || undefined
       );
       
       setHasTogetherApiKey(result.hasTogetherApiKey);
-      setHasDuckduckgoApiKey(result.hasDuckduckgoApiKey);
+      setHasStabilityApiKey(result.hasStabilityApiKey);
       
       apiKeysForm.reset({
         togetherApiKey: "",
-        duckduckgoApiKey: "",
+        stabilityApiKey: "",
       });
       
       toast({
@@ -310,19 +310,19 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
 
                   <FormField
                     control={apiKeysForm.control}
-                    name="duckduckgoApiKey"
+                    name="stabilityApiKey"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>DuckDuckGo API Key</FormLabel>
+                        <FormLabel>Stability AI API Key</FormLabel>
                         <div className="relative">
                           <FormControl>
                             <Input
                               placeholder={
-                                hasDuckduckgoApiKey
+                                hasStabilityApiKey
                                   ? "API key already saved"
-                                  : "Enter your DuckDuckGo API key"
+                                  : "Enter your Stability AI API key"
                               }
-                              type={showDuckduckgoApiKey ? "text" : "password"}
+                              type={showStabilityApiKey ? "text" : "password"}
                               {...field}
                             />
                           </FormControl>
@@ -332,10 +332,10 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                             size="icon"
                             className="absolute right-2 top-1/2 transform -translate-y-1/2"
                             onClick={() =>
-                              setShowDuckduckgoApiKey(!showDuckduckgoApiKey)
+                              setShowStabilityApiKey(!showStabilityApiKey)
                             }
                           >
-                            {showDuckduckgoApiKey ? (
+                            {showStabilityApiKey ? (
                               <EyeOff className="h-4 w-4" />
                             ) : (
                               <Eye className="h-4 w-4" />
@@ -343,7 +343,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                           </Button>
                         </div>
                         <FormDescription>
-                          Required for web search functionality
+                          Required for image generation functionality
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

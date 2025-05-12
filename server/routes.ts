@@ -178,7 +178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // For guest users, return default API key state
         return res.json({
           hasTogetherApiKey: false,
-          hasDuckduckgoApiKey: false
+          hasStabilityApiKey: false
         });
       }
       

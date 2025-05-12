@@ -85,16 +85,16 @@ export async function generateCodeDownload(code: string, language: string, filen
 }
 
 // API key functions
-export async function saveApiKeys(togetherApiKey?: string, duckduckgoApiKey?: string): Promise<{
+export async function saveApiKeys(togetherApiKey?: string, stabilityApiKey?: string): Promise<{
   hasTogetherApiKey: boolean;
-  hasDuckduckgoApiKey: boolean;
+  hasStabilityApiKey: boolean;
 }> {
-  return apiRequest("POST", "/api-keys", { togetherApiKey, duckduckgoApiKey });
+  return apiRequest("POST", "/api-keys", { togetherApiKey, stabilityApiKey });
 }
 
 export async function getApiKeysStatus(): Promise<{
   hasTogetherApiKey: boolean;
-  hasDuckduckgoApiKey: boolean;
+  hasStabilityApiKey: boolean;
 }> {
   return apiRequest("GET", "/api-keys");
 }

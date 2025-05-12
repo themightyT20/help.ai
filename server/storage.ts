@@ -209,7 +209,7 @@ export class DatabaseStorage implements IStorage {
     const apiKeyData = {
       ...insertApiKey,
       togetherApiKey: insertApiKey.togetherApiKey ?? null,
-      duckduckgoApiKey: insertApiKey.duckduckgoApiKey ?? null
+      stabilityApiKey: insertApiKey.stabilityApiKey ?? null
     };
 
     const [apiKey] = await db

@@ -8,6 +8,7 @@ interface AuthContextType {
   error: Error | null;
   login: (email: string, password: string) => Promise<User>;
   register: (username: string, email: string, password: string) => Promise<User>;
+  loginAsGuest: () => void;
   logout: () => Promise<void>;
   refetchUser: () => Promise<void>;
 }
@@ -78,6 +79,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     queryClient.invalidateQueries();
     await refetchUser();
   };
+  
+  const loginAsGuest = () => {
+    // Guest mode just bypasses authentication
+    localStorage.setItem('guest-mode', 'true');
+  };
 
   const value = useMemo<AuthContextType>(() => ({
     user: user as User | null,
@@ -85,6 +91,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     error: error as Error | null,
     login,
     register,
+    loginAsGuest,
     logout,
     refetchUser
   }), [user, isLoading, error, refetch]);

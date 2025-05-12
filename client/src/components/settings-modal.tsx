@@ -35,7 +35,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { settingsSchema } from "@shared/schema";
 import { loadSettings, saveSettings, saveApiKeys, getApiKeysStatus } from "@/lib/api";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth-context";
 import { queryClient } from "@/lib/queryClient";
 
 interface SettingsModalProps {

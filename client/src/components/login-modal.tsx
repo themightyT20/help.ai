@@ -66,11 +66,20 @@ export function LoginModal({ onClose }: LoginModalProps) {
     return {} as any;
   };
   
+  let loginAsGuest = () => {
+    toast({
+      title: "Guest mode activated",
+      description: "You are now using the app as a guest",
+    });
+    localStorage.setItem('guest-mode', 'true');
+  };
+  
   // Try to get auth functions if context is available
   try {
     const auth = useAuth();
     login = auth.login;
     register = auth.register;
+    loginAsGuest = auth.loginAsGuest;
   } catch (error) {
     console.warn("Auth context not available in login modal:", error);
   }
@@ -146,10 +155,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
               variant="outline"
               className="w-full"
               onClick={() => {
-                toast({
-                  title: "Guest Mode Activated",
-                  description: "You are now using the app as a guest"
-                });
+                loginAsGuest();
                 onClose();
               }}
             >

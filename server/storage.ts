@@ -16,24 +16,24 @@ export interface IStorage {
   getUserByProvider(provider: string, providerId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<User>): Promise<User | undefined>;
-  
+
   // Conversation operations
   getConversation(id: number): Promise<Conversation | undefined>;
   getConversationsByUserId(userId: number): Promise<Conversation[]>;
   createConversation(conversation: InsertConversation): Promise<Conversation>;
   updateConversation(id: number, conversation: Partial<Conversation>): Promise<Conversation | undefined>;
   deleteConversation(id: number): Promise<boolean>;
-  
+
   // Message operations
   getMessage(id: number): Promise<Message | undefined>;
   getMessagesByConversationId(conversationId: number): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
-  
+
   // API key operations
   getApiKeysByUserId(userId: number): Promise<ApiKey | undefined>;
   createApiKey(apiKey: InsertApiKey): Promise<ApiKey>;
   updateApiKey(userId: number, apiKey: Partial<ApiKey>): Promise<ApiKey | undefined>;
-  
+
   // Session store for authentication
   sessionStore: session.Store;
 }
@@ -41,7 +41,7 @@ export interface IStorage {
 // Database storage implementation using Drizzle ORM
 export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
-  
+
   constructor() {
     const PostgresSessionStore = connectPg(session);
     this.sessionStore = new PostgresSessionStore({ 
@@ -115,12 +115,12 @@ export class DatabaseStorage implements IStorage {
       createdAt: now,
       updatedAt: now
     };
-    
+
     const [conversation] = await db
       .insert(schema.conversations)
       .values(conversationWithTimestamps)
       .returning();
-    
+
     return conversation;
   }
 
@@ -129,13 +129,13 @@ export class DatabaseStorage implements IStorage {
       ...conversationData,
       updatedAt: new Date()
     };
-    
+
     const [updatedConversation] = await db
       .update(schema.conversations)
       .set(dataWithUpdatedAt)
       .where(eq(schema.conversations.id, id))
       .returning();
-    
+
     return updatedConversation;
   }
 
@@ -144,13 +144,13 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(schema.messages)
       .where(eq(schema.messages.conversationId, id));
-    
+
     // Then delete the conversation
     const [deleted] = await db
       .delete(schema.conversations)
       .where(eq(schema.conversations.id, id))
       .returning();
-    
+
     return !!deleted;
   }
 
@@ -160,7 +160,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(schema.messages)
       .where(eq(schema.messages.id, id));
-    
+
     return message;
   }
 
@@ -177,20 +177,20 @@ export class DatabaseStorage implements IStorage {
       ...insertMessage,
       timestamp: new Date()
     };
-    
+
     // Ensure metadata is present as null if not provided
     if (messageWithTimestamp.metadata === undefined) {
       messageWithTimestamp.metadata = null;
     }
-    
+
     const [message] = await db
       .insert(schema.messages)
       .values(messageWithTimestamp)
       .returning();
-    
+
     // Update the conversation's updatedAt timestamp
     await this.updateConversation(insertMessage.conversationId, { updatedAt: new Date() });
-    
+
     return message;
   }
 
@@ -200,7 +200,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(schema.apiKeys)
       .where(eq(schema.apiKeys.userId, userId));
-    
+
     return apiKey;
   }
 
@@ -211,18 +211,18 @@ export class DatabaseStorage implements IStorage {
       togetherApiKey: insertApiKey.togetherApiKey ?? null,
       duckduckgoApiKey: insertApiKey.duckduckgoApiKey ?? null
     };
-    
+
     const [apiKey] = await db
       .insert(schema.apiKeys)
       .values(apiKeyData)
       .returning();
-    
+
     return apiKey;
   }
 
   async updateApiKey(userId: number, apiKeyData: Partial<ApiKey>): Promise<ApiKey | undefined> {
     const existingApiKey = await this.getApiKeysByUserId(userId);
-    
+
     if (!existingApiKey) {
       // Create a new API key if one doesn't exist
       return this.createApiKey({ 
@@ -232,13 +232,13 @@ export class DatabaseStorage implements IStorage {
         duckduckgoApiKey: apiKeyData.duckduckgoApiKey ?? null 
       } as InsertApiKey);
     }
-    
+
     const [updatedApiKey] = await db
       .update(schema.apiKeys)
       .set(apiKeyData)
       .where(eq(schema.apiKeys.userId, userId))
       .returning();
-    
+
     return updatedApiKey;
   }
 }

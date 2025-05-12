@@ -46,7 +46,7 @@ const registerSchema = z.object({
 export function LoginModal({ onClose }: LoginModalProps) {
   const [mode, setMode] = useState<"login" | "register">("login");
   const { toast } = useToast();
-  
+
   // Initialize with dummy functions that show the auth error
   let login = async (_email: string, _password: string) => {
     toast({
@@ -56,7 +56,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
     });
     return {} as any;
   };
-  
+
   let register = async (_username: string, _email: string, _password: string) => {
     toast({
       title: "Authentication error",
@@ -65,7 +65,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
     });
     return {} as any;
   };
-  
+
   let loginAsGuest = () => {
     toast({
       title: "Guest mode activated",
@@ -73,7 +73,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
     });
     localStorage.setItem('guest-mode', 'true');
   };
-  
+
   // Try to get auth functions if context is available
   try {
     const auth = useAuth();
@@ -238,8 +238,9 @@ export function LoginModal({ onClose }: LoginModalProps) {
                     <FormItem>
                       <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="username" 
+                        <Input
+                          placeholder="username"
+                          className="bg-white dark:bg-gray-950"
                           value={field.value}
                           onChange={field.onChange}
                           onBlur={field.onBlur}

@@ -15,11 +15,11 @@ export function initChatRoutes(app: Express) {
   app.post("/api/chat", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { message, conversationId } = messageRequestSchema.parse(req.body);
-      
+
       // Handle guest mode
       const isGuestMode = req.headers['x-guest-mode'] === 'true';
       const userId = isGuestMode ? 0 : (req.user as any).id;
-      
+
       // For guest mode, we skip conversation validation
       let conversation;
       if (isGuestMode) {
@@ -33,20 +33,20 @@ export function initChatRoutes(app: Express) {
       } else {
         // Get the conversation for registered users
         conversation = await storage.getConversation(conversationId);
-        
+
         if (!conversation) {
           return res.status(404).json({ message: "Conversation not found" });
         }
-        
+
         if (conversation.userId !== userId) {
           return res.status(403).json({ message: "Access denied" });
         }
       }
-      
+
       // Define messages for guest mode or store them for registered users
       let userMessage;
       let conversationHistory;
-      
+
       if (isGuestMode) {
         // For guest users, create mock messages without storing in the database
         userMessage = {
@@ -56,7 +56,7 @@ export function initChatRoutes(app: Express) {
           role: "user",
           createdAt: new Date()
         };
-        
+
         // For guest users, we have no history, just the current message
         conversationHistory = [userMessage];
       } else {
@@ -66,21 +66,21 @@ export function initChatRoutes(app: Express) {
           content: message,
           role: "user",
         });
-        
+
         // Get conversation history for context
         conversationHistory = await storage.getMessagesByConversationId(conversationId);
       }
-      
+
       // Get user's API key or use default
       const apiKeys = isGuestMode ? null : await storage.getApiKeysByUserId(userId);
-      
+
       // For guest mode, we'll always try to use the environment variable
       let togetherApiKey;
-      
+
       if (isGuestMode) {
         // For guest users, only use the environment variable
         togetherApiKey = process.env.TOGETHER_AI_API_KEY || "";
-        
+
         // If no key is available, provide a friendly message
         if (!togetherApiKey) {
           return res.status(400).json({ 
@@ -90,20 +90,20 @@ export function initChatRoutes(app: Express) {
       } else {
         // For registered users, use their key or fallback to environment variable
         togetherApiKey = apiKeys?.togetherApiKey || process.env.TOGETHER_AI_API_KEY || "";
-        
+
         if (!togetherApiKey) {
           return res.status(400).json({ 
             message: "No Together AI API key found. Please add an API key in settings."
           });
         }
       }
-      
+
       // Format conversation history for the AI model
       const formattedHistory = conversationHistory.map(msg => ({
         role: msg.role,
         content: msg.content
       }));
-      
+
       // Call the Together AI API
       const response = await fetch("https://api.together.xyz/v1/chat/completions", {
         method: "POST",
@@ -124,26 +124,26 @@ export function initChatRoutes(app: Express) {
           max_tokens: 1024
         })
       });
-      
+
       if (!response.ok) {
         const errorData = await response.text();
         console.error("Together AI API error:", errorData);
         return res.status(500).json({ message: "Failed to get response from AI model" });
       }
-      
+
       const data = await response.json() as any;
-      
+
       // Extract the AI's response
       const aiResponse = data.choices?.[0]?.message?.content;
-      
+
       if (!aiResponse) {
         console.error("Invalid response format from Together AI:", data);
         return res.status(500).json({ message: "Invalid response format from AI model" });
       }
-      
+
       // Handle different message storage for guest vs registered users
       let assistantMessage;
-      
+
       if (isGuestMode) {
         // For guest users, create mock message without storing in database
         assistantMessage = {
@@ -161,7 +161,7 @@ export function initChatRoutes(app: Express) {
           role: "assistant",
         });
       }
-      
+
       // Return both messages
       res.json({
         userMessage,
@@ -175,4 +175,12 @@ export function initChatRoutes(app: Express) {
       res.status(500).json({ message: "Failed to process message" });
     }
   });
+
+  app.get("/api/conversations", async (req: Request, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const conversations = await storage.getConversations(req.user.id);
+  });
 }
+```

@@ -189,10 +189,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
                         <Input
                           placeholder="you@example.com"
                           type="email"
-                          value={field.value}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
-                          name={field.name}
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -262,10 +259,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
                         <Input
                           placeholder="you@example.com"
                           type="email"
-                          value={field.value}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
-                          name={field.name}
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />

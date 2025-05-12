@@ -26,10 +26,10 @@ export const ChatMessage = forwardRef<HTMLDivElement, ChatMessageProps>(
           });
         }
 
-        // Add the code block
+        // Add the code block with language type safety
         parts.push({
           type: "code",
-          language: match[1] || "plaintext",
+          language: (match[1] || "plaintext") as string,
           content: match[2],
         });
 
@@ -50,10 +50,10 @@ export const ChatMessage = forwardRef<HTMLDivElement, ChatMessageProps>(
     const processedContent = processContent();
 
     return (
-      <div ref={ref} className="flex items-start space-x-4">
+      <div ref={ref} className={`flex items-start space-x-4 mb-4 ${role === "user" ? "flex-row-reverse justify-start pl-12" : "pr-12"}`}>
         <div
           className={`w-8 h-8 rounded-full flex items-center justify-center text-white flex-shrink-0 ${
-            role === "user" ? "bg-blue-500" : "bg-primary"
+            role === "user" ? "bg-blue-500 ml-4" : "bg-primary mr-4"
           }`}
         >
           {role === "user" ? (
@@ -65,7 +65,7 @@ export const ChatMessage = forwardRef<HTMLDivElement, ChatMessageProps>(
         <div
           className={`flex-1 p-4 rounded-lg shadow-sm ${
             role === "user"
-              ? "bg-blue-100 dark:bg-blue-900"
+              ? "bg-blue-600 dark:bg-blue-800 text-white"
               : "bg-[hsl(var(--lightChat))] dark:bg-[hsl(var(--darkChat))]"
           }`}
         >
@@ -87,7 +87,7 @@ export const ChatMessage = forwardRef<HTMLDivElement, ChatMessageProps>(
                 <CodeBlock
                   key={index}
                   code={part.content}
-                  language={part.language}
+                  language={part.language || 'plaintext'}
                   className="mb-4"
                 />
               );

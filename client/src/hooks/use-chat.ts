@@ -100,7 +100,16 @@ export function useChat() {
       timestamp: new Date(),
     };
     
-    setMessages(prev => [...prev, userMessage, loadingMessage]);
+    setMessages(prev => {
+      // Generate temporary IDs for optimistic updates to prevent duplicate keys
+      const tempUserMessageId = Date.now();
+      const tempLoadingMessageId = Date.now() + 1;
+      return [
+        ...prev, 
+        {...userMessage, id: tempUserMessageId}, 
+        {...loadingMessage, id: tempLoadingMessageId}
+      ];
+    });
 
     try {
       // The API will automatically include guest mode header if needed

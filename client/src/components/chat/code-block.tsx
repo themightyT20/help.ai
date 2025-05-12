@@ -88,7 +88,7 @@ export function CodeBlock({ code, language, className }: CodeBlockProps) {
     try {
       setIsDownloading(true);
       const filename = `code_snippet_${new Date().getTime()}`;
-      const result = await generateCodeDownload(code, language, filename);
+      const result = await generateCodeDownload(code, language || 'plaintext', filename);
       
       // Create a link element and click it to download
       const link = document.createElement("a");

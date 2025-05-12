@@ -97,7 +97,9 @@ export const ChatMessage = forwardRef<HTMLDivElement, ChatMessageProps>(
 
           {timestamp && (
             <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-              {new Date(timestamp).toLocaleString()}
+              {timestamp instanceof Date && !isNaN(timestamp.getTime()) 
+                ? timestamp.toLocaleString() 
+                : ''}
             </div>
           )}
         </div>

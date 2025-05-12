@@ -53,12 +53,21 @@ export function CodeBlock({ code, language, className }: CodeBlockProps) {
 
   const prismLanguage = languageMap[language] || language || "plaintext";
 
-  // Highlight the code using Prism
-  const highlightedCode = Prism.highlight(
-    code,
-    Prism.languages[prismLanguage] || Prism.languages.plaintext,
-    prismLanguage
-  );
+  // Highlight the code using Prism, with safeguards
+  let highlightedCode = '';
+  try {
+    // Make sure we have a valid language and it's loaded
+    const language = Prism.languages[prismLanguage] || Prism.languages.plaintext;
+    highlightedCode = Prism.highlight(
+      code || '',  // Ensure code is never undefined
+      language,
+      prismLanguage || 'plaintext'
+    );
+  } catch (error) {
+    console.error('Error highlighting code:', error);
+    // Fallback to displaying plain text if highlighting fails
+    highlightedCode = code || '';
+  }
 
   const handleCopy = async () => {
     try {

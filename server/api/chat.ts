@@ -184,4 +184,3 @@ export function initChatRoutes(app: Express) {
     res.json(conversations);
   });
 }
-```

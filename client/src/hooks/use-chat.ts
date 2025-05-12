@@ -103,16 +103,8 @@ export function useChat() {
     setMessages(prev => [...prev, userMessage, loadingMessage]);
 
     try {
-      // Add the x-guest-mode header if in guest mode
-      const isGuestMode = localStorage.getItem('guest-mode') === 'true';
-      
-      // Send message with guest mode header if needed
-      let apiHeaders = {};
-      if (isGuestMode) {
-        apiHeaders = { 'x-guest-mode': 'true' };
-      }
-      
-      const response = await sendMessage(content, conversation.id, apiHeaders);
+      // The API will automatically include guest mode header if needed
+      const response = await sendMessage(content, conversation.id);
       
       // Update messages with real data
       setMessages(prev => {

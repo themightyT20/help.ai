@@ -1,0 +1,52 @@
+Failed to fetch API keys: error: column "stability_api_key" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getApiKeysByUserId (/home/runner/workspace/server/storage.ts:199:22)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:186:23) {
+  length: 117,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '45',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3722',
+  routine: 'errorMissingColumn'
+}
+4:32:32 PM [express] GET /api/api-keys 500 in 963ms :: {"message":"Failed to fetch API keys"}
+4:32:33 PM [express] GET /api/conversations 200 in 1025ms :: [{"id":8,"userId":1,"title":"New Conver…
+4:32:33 PM [express] GET /api/conversations/5 304 in 1657ms :: {"conversation":{"id":5,"userId":1,"t…
+Chat API error: error: column "stability_api_key" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getApiKeysByUserId (/home/runner/workspace/server/storage.ts:199:22)
+    at async <anonymous> (/home/runner/workspace/server/api/chat.ts:75:44) {
+  length: 117,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '45',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3722',
+  routine: 'errorMissingColumn'
+}
+4:32:50 PM [express] POST /api/chat 500 in 1951ms :: {"message":"Failed to process message"}

@@ -141,9 +141,9 @@ export function LoginModal({ onClose }: LoginModalProps) {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-black">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-center">
             {mode === "login" ? "Sign in to Help.ai" : "Sign up for Help.ai"}
           </DialogTitle>
         </DialogHeader>
@@ -153,7 +153,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
           <div className="space-y-3">
             <Button
               variant="outline"
-              className="w-full"
+              className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black hover:bg-gray-100 dark:hover:bg-gray-900"
               onClick={() => {
                 loginAsGuest();
                 onClose();

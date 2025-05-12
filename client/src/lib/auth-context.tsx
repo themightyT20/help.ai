@@ -22,16 +22,23 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const queryClient = useQueryClient();
   
+  // Check if guest mode is enabled
+  const isGuestMode = localStorage.getItem('guest-mode') === 'true';
+  
   const { 
     data: user, 
-    isLoading, 
+    isLoading: apiIsLoading, 
     error, 
     refetch 
   } = useQuery({ 
     queryKey: ['/api/user'],
     retry: false,
-    staleTime: 1000 * 60 * 60 // 1 hour
+    staleTime: 1000 * 60 * 60, // 1 hour
+    enabled: !isGuestMode // Only run the query if not in guest mode
   });
+  
+  // If in guest mode, we're never loading
+  const isLoading = isGuestMode ? false : apiIsLoading;
 
   const refetchUser = async () => {
     await refetch();
@@ -85,8 +92,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.setItem('guest-mode', 'true');
   };
 
+  // Create a mock user for guest mode
+  const guestUser = isGuestMode ? {
+    id: 0,
+    username: 'Guest',
+    email: 'guest@example.com',
+    password: null,
+    profilePicture: null,
+    provider: null,
+    providerId: null
+  } as User : null;
+  
   const value = useMemo<AuthContextType>(() => ({
-    user: user as User | null,
+    user: isGuestMode ? guestUser : (user as User | null),
     isLoading,
     error: error as Error | null,
     login,
@@ -94,7 +112,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     loginAsGuest,
     logout,
     refetchUser
-  }), [user, isLoading, error, refetch]);
+  }), [user, isLoading, error, refetch, isGuestMode, guestUser]);
 
   return (
     <AuthContext.Provider value={value}>

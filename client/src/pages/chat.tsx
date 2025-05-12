@@ -98,7 +98,10 @@ export default function Chat(props: ChatProps = {}) {
   };
 
   const handleNewChat = async () => {
-    if (!user) {
+    // Check if user is logged in or in guest mode
+    const isGuestMode = localStorage.getItem('guest-mode') === 'true';
+    
+    if (!user && !isGuestMode) {
       setShowLoginModal(true);
       return;
     }
@@ -142,9 +145,6 @@ export default function Chat(props: ChatProps = {}) {
             {/* Welcome Screen */}
             {messages.length === 0 && !isLoading && (
               <div className="flex flex-col items-center justify-center space-y-6 h-full text-center py-8 max-w-3xl mx-auto">
-                <div className="w-24 h-24 rounded-full border-2 border-gray-800 dark:border-gray-200 flex items-center justify-center">
-                  <Bot className="h-12 w-12 text-gray-800 dark:text-gray-200" />
-                </div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Welcome to Help.ai</h1>
                 <p className="text-md text-gray-800 dark:text-gray-200 max-w-lg">
                   Powered by Nous-Hermes-2-Mixtral-8x7B-DPO, I can assist with coding, answer questions, search the web, 

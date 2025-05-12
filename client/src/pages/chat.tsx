@@ -152,17 +152,17 @@ export default function Chat(props: ChatProps = {}) {
                 </p>
 
                 {/* Example prompts */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl mt-4">
                   {examplePrompts.map((example, index) => (
                     <Button
                       key={index}
                       variant="outline"
-                      className="h-auto p-4 w-full bg-slate-800 text-left hover:bg-slate-700 transition-colors border border-slate-700 overflow-hidden text-white"
+                      className="h-full py-5 px-5 w-full bg-slate-800 text-left hover:bg-slate-700 transition-colors border border-slate-700 text-white flex flex-col rounded-md"
                       onClick={() => handleSendMessage(example.prompt)}
                     >
                       <div className="flex flex-col items-start w-full">
                         <div className="font-medium mb-1">{example.title}</div>
-                        <div className="text-sm text-gray-300 break-words line-clamp-2">
+                        <div className="text-sm text-gray-300 break-words">
                           {example.prompt}
                         </div>
                       </div>

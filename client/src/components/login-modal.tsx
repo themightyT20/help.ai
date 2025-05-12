@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -28,7 +28,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
   const [isGuest, setIsGuest] = useState(false);
   const { login, signup } = useAuth();
   const { toast } = useToast();
-  const [, navigate] = useNavigate();
+  const [, setLocation] = useLocation();
 
   const form = useForm({
     resolver: zodResolver(signupSchema),
@@ -43,7 +43,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
   const handleContinueAsGuest = async () => {
     localStorage.setItem('guest-mode', 'true');
     onClose();
-    navigate('/');
+    setLocation('/');
   };
 
   const onSubmit = async (values: z.infer<typeof signupSchema>) => {
@@ -54,7 +54,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
         description: "Account created successfully",
       });
       onClose();
-      navigate('/');
+      setLocation('/');
     } catch (error) {
       toast({
         title: "Error",

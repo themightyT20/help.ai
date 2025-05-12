@@ -116,14 +116,18 @@ export function initChatRoutes(app: Express) {
         role: "system",
         content: "You are Help.ai, a helpful AI assistant powered by Nous-Hermes-2-Mixtral-8x7B-DPO. You can assist with coding, answer questions, help with tasks, and provide accurate information. When generating code, include copy and download options. Always base your answers on accurate information and help the user to the best of your abilities."
       };
-      
+
       // Add memory context to system message if available
       if (userMemory) {
         systemMessage.content += `\n\nHere is some context from previous conversations with this user: ${JSON.stringify(userMemory)}`;
       }
 
-      // Get Stability API key from environment variables
+      // Get API keys from environment or user config
       const stabilityApiKey = process.env.STABILITY_API_KEY;
+      const togetherApiKey = apiKeys?.togetherApiKey || process.env.TOGETHER_AI_API_KEY;
+
+      // Get Stability API key from environment variables
+      // const stabilityApiKey = process.env.STABILITY_API_KEY;
 
       // Call the Together AI API
       const response = await fetch("https://api.together.xyz/v1/chat/completions", {
@@ -189,17 +193,17 @@ export function initChatRoutes(app: Express) {
             let memory: any = user.memory || {};
             if (!memory) memory = {};
             if (!Array.isArray(memory.conversations)) memory.conversations = [];
-            
+
             // Create a basic summary of this conversation
             const currentContext = {
               lastInteraction: new Date().toISOString(),
               topic: message.substring(0, 100), // Use start of message as topic indicator
               response: aiResponse.substring(0, 200), // Brief summary of the response
             };
-            
+
             // Add to or update memory
             memory.conversations = [...memory.conversations, currentContext].slice(-10); // Keep last 10 interactions
-            
+
             // Update user's memory
             await storage.updateUser(userId, { memory });
           }
@@ -208,7 +212,7 @@ export function initChatRoutes(app: Express) {
           // Continue without memory update if it fails
         }
       }
-      
+
       // Return both messages
       res.json({
         userMessage,

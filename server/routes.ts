@@ -186,12 +186,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const apiKeys = await storage.getApiKeysByUserId(userId);
       
       // Don't return actual keys, just whether they exist
-      const sanitizedKeys = apiKeys ? {
-        hasTogetherApiKey: Boolean(apiKeys.togetherApiKey),
-        hasStabilityApiKey: Boolean(apiKeys.stabilityApiKey),
-      } : {
-        hasTogetherApiKey: false,
-        hasDuckduckgoApiKey: false
+      const sanitizedKeys = {
+        hasTogetherApiKey: Boolean(apiKeys?.togetherApiKey || process.env.TOGETHER_AI_API_KEY),
+        hasStabilityApiKey: Boolean(process.env.STABILITY_API_KEY)
       };
       
       res.json(sanitizedKeys);

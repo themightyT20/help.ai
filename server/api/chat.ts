@@ -99,10 +99,17 @@ export function initChatRoutes(app: Express) {
       }
 
       // Format conversation history for the AI model
-      const formattedHistory = conversationHistory.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
+      // Limit the history to prevent "Request entity too large" errors
+      // Only take the last 10 messages to keep the request size manageable
+      const formattedHistory = conversationHistory
+        .slice(-10) // Take only the last 10 messages
+        .map(msg => ({
+          role: msg.role,
+          // Truncate very long message content to prevent oversized requests
+          content: msg.content.length > 8000 ? 
+            msg.content.substring(0, 8000) + "... [content truncated due to length]" : 
+            msg.content
+        }));
 
       // Get user memory if it exists (for registered users)
       let userMemory = null;
@@ -119,7 +126,19 @@ export function initChatRoutes(app: Express) {
 
       // Add memory context to system message if available
       if (userMemory) {
-        systemMessage.content += `\n\nHere is some context from previous conversations with this user: ${JSON.stringify(userMemory)}`;
+        // Format memory in a more concise way to avoid large payloads
+        let memoryString = "";
+        if (userMemory.conversations && userMemory.conversations.length > 0) {
+          memoryString = userMemory.conversations
+            .slice(-5) // Only include the 5 most recent memory items
+            .map((conv: any) => `- Topic: ${conv.topic}, Response: ${conv.response}`)
+            .join("\n");
+        }
+        
+        // Only add memory if we actually have something to add
+        if (memoryString) {
+          systemMessage.content += `\n\nHere is some context from previous conversations with this user:\n${memoryString}`;
+        }
       }
 
       // Get API keys from environment or user config

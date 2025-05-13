@@ -100,8 +100,8 @@ export function ChatInput({ onSendMessage, disabled = false, conversationId }: C
         open={showImageDialog}
         onClose={() => setShowImageDialog(false)}
         onImageGenerated={(imageUrl, prompt) => {
-          // When an image is generated, send it as a message
-          onSendMessage(`Generated image with prompt: "${prompt}"`);
+          // When an image is generated, send the user's prompt as a message first
+          onSendMessage(prompt);
           setShowImageDialog(false);
         }}
         conversationId={conversationId}

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Chat from "@/pages/chat";
 import Login from "@/pages/auth/login";
+import ImageGenerator from "@/pages/image-generator";
 import { useEffect, useState } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
@@ -46,6 +47,9 @@ function Router() {
       <Route path="/register">
         {() => <Login />}
       </Route>  {/* Reuse Login component for register too */}
+      <Route path="/image-generator">
+        {() => <ImageGenerator />}
+      </Route>
       <Route>
         {() => <NotFound />}
       </Route>

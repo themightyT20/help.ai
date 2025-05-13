@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Plus, LogOut, Settings, HelpCircle, Menu, Moon, Sun } from "lucide-react";
+import { Plus, LogOut, Settings, HelpCircle, Menu, Moon, Sun, Image } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "next-themes";
@@ -107,8 +107,8 @@ export function Sidebar({ onNewChat, currentConversationId }: SidebarProps) {
           <h1 className="text-xl font-semibold">Help.ai</h1>
         </div>
 
-        {/* New chat button */}
-        <div className="p-4">
+        {/* New chat and Image Generator buttons */}
+        <div className="p-4 space-y-2">
           <Button
             className="w-full"
             onClick={() => {
@@ -121,6 +121,21 @@ export function Sidebar({ onNewChat, currentConversationId }: SidebarProps) {
           >
             <Plus className="h-4 w-4 mr-2" />
             New Chat
+          </Button>
+
+          <Button
+            className="w-full"
+            variant="outline"
+            onClick={() => {
+              navigate("/image-generator");
+              // On mobile, close the sidebar 
+              if (window.innerWidth < 1024) {
+                setIsOpen(false);
+              }
+            }}
+          >
+            <Image className="h-4 w-4 mr-2" />
+            Image Generator
           </Button>
         </div>
 

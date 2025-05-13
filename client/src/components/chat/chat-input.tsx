@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ImageIcon, SendIcon } from "lucide-react";
+import { ImageIcon, SendIcon, ExternalLink } from "lucide-react";
 import { ImageGenerationDialog } from "./image-generation-dialog";
+import { useLocation } from "wouter";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -14,6 +15,7 @@ export function ChatInput({ onSendMessage, disabled = false, conversationId }: C
   const [message, setMessage] = useState("");
   const [showImageDialog, setShowImageDialog] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [_, navigate] = useLocation();
 
   // Auto-resize the textarea
   useEffect(() => {

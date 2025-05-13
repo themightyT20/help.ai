@@ -229,7 +229,7 @@ export class DatabaseStorage implements IStorage {
         userId, 
         ...apiKeyData,
         togetherApiKey: apiKeyData.togetherApiKey ?? null, 
-        duckduckgoApiKey: apiKeyData.duckduckgoApiKey ?? null 
+        stabilityApiKey: apiKeyData.stabilityApiKey ?? null 
       } as InsertApiKey);
     }
 

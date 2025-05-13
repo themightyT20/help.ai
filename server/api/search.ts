@@ -9,7 +9,7 @@ const searchRequestSchema = z.object({
 });
 
 export function initSearchRoutes(app: Express) {
-  app.post("/api/search", isAuthenticated, async (req: Request, res: Response) => {
+  app.post("/api/search", async (req: Request, res: Response) => {
     try {
       const { query } = searchRequestSchema.parse(req.body);
       const userId = (req.user as any).id;

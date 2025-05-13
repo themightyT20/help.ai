@@ -9,8 +9,8 @@ const imageGenerationRequestSchema = z.object({
   prompt: z.string().min(1),
   negativePrompt: z.string().optional(),
   stylePreset: z.string().optional(),
-  width: z.number().int().min(512).max(1024).default(512),
-  height: z.number().int().min(512).max(1024).default(512),
+  width: z.number().int().min(640).max(1536).default(1024),
+  height: z.number().int().min(640).max(1536).default(1024),
   conversationId: z.number().optional(),
   samples: z.number().int().min(1).max(4).default(1),
 });

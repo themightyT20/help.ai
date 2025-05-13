@@ -23,7 +23,7 @@ export function ImageGenerationDialog({
 }: ImageGenerationDialogProps) {
   const [prompt, setPrompt] = useState("");
   const [negativePrompt, setNegativePrompt] = useState("");
-  const [size, setSize] = useState<[number, number]>([512, 512]);
+  const [size, setSize] = useState<[number, number]>([1024, 1024]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<Array<{ imageUrl: string, seed: number }>>([]);
   const { toast } = useToast();
@@ -117,26 +117,26 @@ export function ImageGenerationDialog({
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => setSize([512, 512])}
-                disabled={isGenerating || (size[0] === 512 && size[1] === 512)}
-              >
-                512x512
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setSize([768, 768])}
-                disabled={isGenerating || (size[0] === 768 && size[1] === 768)}
-              >
-                768x768
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
                 onClick={() => setSize([1024, 1024])}
                 disabled={isGenerating || (size[0] === 1024 && size[1] === 1024)}
               >
-                1024x1024
+                1024×1024
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setSize([1152, 896])}
+                disabled={isGenerating || (size[0] === 1152 && size[1] === 896)}
+              >
+                1152×896
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setSize([896, 1152])}
+                disabled={isGenerating || (size[0] === 896 && size[1] === 1152)}
+              >
+                896×1152
               </Button>
             </div>
           </div>

@@ -5,6 +5,69 @@ import { insertMessageSchema } from "@shared/schema";
 import { isAuthenticated } from "../middleware/auth";
 import fetch from "node-fetch";
 
+// Function to detect if a message is requesting web search information
+function detectWebSearchIntent(message: string): boolean {
+  const message_lower = message.toLowerCase();
+  
+  // Look for web search intent patterns
+  const searchPatterns = [
+    /search (?:for|about|on) .+/i,
+    /find .+ (?:on|about|in) .+/i,
+    /look up .+/i,
+    /what is .+/i,
+    /who is .+/i,
+    /where is .+/i,
+    /when (?:did|was|is) .+/i,
+    /google .+/i,
+    /search .+/i,
+    /information about .+/i,
+    /latest news (?:on|about) .+/i,
+    /current .+/i,
+    /recent .+/i,
+    /find articles (?:on|about) .+/i,
+    /^can you (search|find|lookup|get) .+/i
+  ];
+  
+  // Check if any pattern matches the message
+  return searchPatterns.some(pattern => pattern.test(message));
+}
+
+// Function to format web search results into a readable summary
+function formatWebSearchResults(results: any): string {
+  let formattedText = '';
+  
+  // Add abstract if available
+  if (results.abstract) {
+    formattedText += `Main result: ${results.abstract}\n`;
+    if (results.abstractSource) {
+      formattedText += `Source: ${results.abstractSource} (${results.abstractURL || 'No URL provided'})\n\n`;
+    }
+  }
+  
+  // Add related topics with their sources
+  if (results.relatedTopics && results.relatedTopics.length > 0) {
+    formattedText += 'Related Information:\n';
+    
+    // Only include up to 5 related topics to keep response size manageable
+    const topicsToInclude = results.relatedTopics.slice(0, 5);
+    
+    topicsToInclude.forEach((topic: any, index: number) => {
+      if (topic.summary) {
+        formattedText += `${index + 1}. ${topic.summary}\n`;
+        if (topic.domain) {
+          formattedText += `   Source: ${topic.domain}\n`;
+        }
+        if (topic.FirstURL) {
+          formattedText += `   URL: ${topic.FirstURL}\n`;
+        }
+        formattedText += '\n';
+      }
+    });
+  }
+  
+  return formattedText;
+}
+
 const messageRequestSchema = z.object({
   message: z.string(),
   conversationId: z.number(),
@@ -15,6 +78,9 @@ export function initChatRoutes(app: Express) {
   app.post("/api/chat", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { message, conversationId } = messageRequestSchema.parse(req.body);
+      
+      // Detect if this message is requesting web search information
+      const shouldPerformWebSearch = detectWebSearchIntent(message);
 
       // Handle guest mode
       const isGuestMode = req.headers['x-guest-mode'] === 'true';
@@ -141,9 +207,44 @@ export function initChatRoutes(app: Express) {
         }
       }
 
+      // Perform web search if needed
+      let webSearchResults = null;
+      if (shouldPerformWebSearch) {
+        try {
+          console.log(`Detected web search intent in message: "${message}"`);
+          
+          // Call the search endpoint
+          const searchResponse = await fetch(`http://localhost:${process.env.PORT || 5000}/api/search`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": req.headers.authorization || "",
+              ...(isGuestMode ? { "x-guest-mode": "true" } : {})
+            },
+            body: JSON.stringify({ query: message })
+          });
+          
+          if (searchResponse.ok) {
+            webSearchResults = await searchResponse.json();
+            console.log("Web search successful");
+          } else {
+            console.error("Web search failed:", await searchResponse.text());
+          }
+        } catch (error) {
+          console.error("Error performing web search:", error);
+          // Continue even if web search fails
+        }
+      }
+
       // Get API keys from environment or user config
       const stabilityApiKey = process.env.STABILITY_API_KEY;
       // Note: togetherApiKey is already defined above
+      
+      // If we have web search results, add them to the system message
+      if (webSearchResults) {
+        const webInfo = formatWebSearchResults(webSearchResults);
+        systemMessage.content += `\n\nI've searched the web for "${message}" and found this information:\n${webInfo}\n\nUse the above information to help answer the user's question. Be sure to cite sources when appropriate.`;
+      }
 
       // Call the Together AI API
       const response = await fetch("https://api.together.xyz/v1/chat/completions", {

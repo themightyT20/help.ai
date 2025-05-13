@@ -194,10 +194,16 @@ export function initChatRoutes(app: Express) {
       if (userMemory) {
         // Format memory in a more concise way to avoid large payloads
         let memoryString = "";
-        if (userMemory.conversations && userMemory.conversations.length > 0) {
-          memoryString = userMemory.conversations
+        
+        // Make sure userMemory is properly formatted
+        const userMemoryObj = typeof userMemory === 'string' 
+          ? JSON.parse(userMemory) 
+          : (userMemory || {});
+        
+        if (userMemoryObj.conversations && Array.isArray(userMemoryObj.conversations) && userMemoryObj.conversations.length > 0) {
+          memoryString = userMemoryObj.conversations
             .slice(-5) // Only include the 5 most recent memory items
-            .map((conv: any) => `- Topic: ${conv.topic}, Response: ${conv.response}`)
+            .map((conv: any) => `- Topic: ${conv.topic || 'Unknown'}, Response: ${conv.response || 'No response'}`)
             .join("\n");
         }
         
@@ -306,10 +312,34 @@ export function initChatRoutes(app: Express) {
         try {
           const user = await storage.getUser(userId);
           if (user) {
-            // Initialize memory if it doesn't exist
-            let memory: any = user.memory || {};
-            if (!memory) memory = {};
-            if (!Array.isArray(memory.conversations)) memory.conversations = [];
+            // Initialize memory object
+            let memoryObj: { conversations: Array<{
+              lastInteraction: string;
+              topic: string;
+              response: string;
+            }> } = { conversations: [] };
+            
+            // Parse existing memory if it exists
+            if (user.memory) {
+              try {
+                const existingMemory = typeof user.memory === 'string' 
+                  ? JSON.parse(user.memory)
+                  : user.memory;
+                
+                if (existingMemory && typeof existingMemory === 'object') {
+                  memoryObj = existingMemory;
+                  
+                  // Ensure conversations array exists
+                  if (!Array.isArray(memoryObj.conversations)) {
+                    memoryObj.conversations = [];
+                  }
+                }
+              } catch (parseError) {
+                console.error("Error parsing user memory:", parseError);
+                // Continue with fresh memory object
+                memoryObj = { conversations: [] };
+              }
+            }
 
             // Create a basic summary of this conversation
             const currentContext = {
@@ -318,11 +348,14 @@ export function initChatRoutes(app: Express) {
               response: aiResponse.substring(0, 200), // Brief summary of the response
             };
 
-            // Add to or update memory
-            memory.conversations = [...memory.conversations, currentContext].slice(-10); // Keep last 10 interactions
+            // Add to or update memory and keep last 10 interactions
+            memoryObj.conversations = [
+              ...memoryObj.conversations, 
+              currentContext
+            ].slice(-10);
 
             // Update user's memory
-            await storage.updateUser(userId, { memory });
+            await storage.updateUser(userId, { memory: memoryObj });
           }
         } catch (error) {
           console.error("Failed to update user memory:", error);

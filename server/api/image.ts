@@ -95,7 +95,7 @@ export function initImageRoutes(app: Express) {
         try {
           const errorData = await response.json();
           console.error('Error details:', errorData);
-          
+
           // Return appropriate message based on status code
           if (response.status === 401) {
             return res.status(401).json({ message: 'Invalid Stability API key. Please check your API key in settings.' });
@@ -104,7 +104,7 @@ export function initImageRoutes(app: Express) {
           } else if (response.status === 429) {
             return res.status(429).json({ message: 'You have reached your Stability API rate limit. Please try again later.' });
           }
-          
+
           return res.status(response.status).json({ 
             message: 'Failed to generate image', 
             details: errorData 
@@ -118,12 +118,12 @@ export function initImageRoutes(app: Express) {
       }
 
       const data: any = await response.json();
-      
+
       // Process the images and create base64 URLs
       const generatedImages = data.artifacts.map((image: any) => {
         const base64Data = image.base64;
         const imageUrl = `data:image/png;base64,${base64Data}`;
-        
+
         return {
           imageUrl,
           seed: image.seed,
@@ -140,7 +140,7 @@ export function initImageRoutes(app: Express) {
             content: `Generated image with prompt: "${prompt}"`,
             role: "user",
           });
-          
+
           // Create assistant message with the image URLs
           await storage.createMessage({
             conversationId,

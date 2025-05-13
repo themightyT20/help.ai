@@ -217,6 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedKeys = await storage.updateApiKey(userId, {
         togetherApiKey,
         stabilityApiKey,
+        stabilityApiKey,
       });
       
       res.status(200).json({

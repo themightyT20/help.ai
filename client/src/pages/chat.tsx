@@ -202,6 +202,7 @@ export default function Chat(props: ChatProps = {}) {
             <ChatInput
               onSendMessage={handleSendMessage}
               disabled={isLoading}
+              conversationId={conversationId || undefined}
             />
           </div>
         </div>

@@ -99,6 +99,29 @@ export async function getApiKeysStatus(): Promise<{
   return apiRequest("GET", "/api-keys");
 }
 
+// Image generation API
+export async function generateImage(params: {
+  prompt: string;
+  negativePrompt?: string;
+  stylePreset?: string;
+  width?: number;
+  height?: number;
+  samples?: number;
+  conversationId?: number;
+}): Promise<{
+  images: Array<{
+    imageUrl: string;
+    seed: number;
+    finishReason: string;
+  }>;
+  prompt: string;
+  width: number;
+  height: number;
+  stylePreset?: string;
+}> {
+  return apiRequest("POST", "/image/generate", params);
+}
+
 // Settings
 export const defaultSettings: Settings = {
   theme: "system",

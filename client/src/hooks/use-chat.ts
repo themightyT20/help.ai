@@ -117,31 +117,32 @@ export function useChat() {
       
       // Update messages with real data
       setMessages(prev => {
-        const newMessages = [...prev];
+        // First, let's filter out any temporary messages (for both user and loading assistant messages)
+        // The temporary messages are added with Date.now() as IDs which are much larger than DB IDs
+        // We'll filter them out by removing messages that don't have proper DB IDs
+        const filtered = prev.filter(msg => {
+          // Keep messages that have server-generated IDs (typically small numbers)
+          // or that aren't the ones we just sent (the last two messages)
+          const isRecentTempMessage = !msg.id || msg.id > Date.now() - 60000;
+          return msg.id && !isRecentTempMessage;
+        });
         
-        // Remove loading message
-        newMessages.pop();
-        
-        // Check if message already exists to prevent duplicates
-        if (!newMessages.some(msg => msg.id === response.userMessage.id)) {
-          newMessages.push({
+        // Add the real messages from the server
+        return [
+          ...filtered,
+          {
             id: response.userMessage.id,
             content: response.userMessage.content,
             role: "user",
             timestamp: new Date(response.userMessage.timestamp),
-          });
-        }
-        
-        if (!newMessages.some(msg => msg.id === response.assistantMessage.id)) {
-          newMessages.push({
+          },
+          {
             id: response.assistantMessage.id,
             content: response.assistantMessage.content,
             role: "assistant",
             timestamp: new Date(response.assistantMessage.timestamp),
-          });
-        }
-        
-        return newMessages;
+          }
+        ];
       });
     } catch (error) {
       console.error("Failed to send message:", error);

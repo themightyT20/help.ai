@@ -1,15 +1,18 @@
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Paperclip, SendIcon } from "lucide-react";
+import { ImageIcon, SendIcon } from "lucide-react";
+import { ImageGenerationDialog } from "./image-generation-dialog";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
   disabled?: boolean;
+  conversationId?: number;
 }
 
-export function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
+export function ChatInput({ onSendMessage, disabled = false, conversationId }: ChatInputProps) {
   const [message, setMessage] = useState("");
+  const [showImageDialog, setShowImageDialog] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize the textarea
@@ -71,9 +74,10 @@ export function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
               size="icon"
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               disabled={disabled}
+              onClick={() => setShowImageDialog(true)}
             >
-              <Paperclip className="h-5 w-5" />
-              <span className="sr-only">Attach file</span>
+              <ImageIcon className="h-5 w-5" />
+              <span className="sr-only">Generate image</span>
             </Button>
             <Button
               type="button"
@@ -90,6 +94,18 @@ export function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
           Help.ai may produce inaccurate information about people, places, or facts.
         </div>
       </div>
+      
+      {/* Image Generation Dialog */}
+      <ImageGenerationDialog
+        open={showImageDialog}
+        onClose={() => setShowImageDialog(false)}
+        onImageGenerated={(imageUrl, prompt) => {
+          // When an image is generated, send it as a message
+          onSendMessage(`Generated image with prompt: "${prompt}"`);
+          setShowImageDialog(false);
+        }}
+        conversationId={conversationId}
+      />
     </div>
   );
 }

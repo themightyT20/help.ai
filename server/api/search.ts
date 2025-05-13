@@ -35,6 +35,37 @@ export function initSearchRoutes(app: Express) {
       const data: any = await response.json();
       
       // Format the search results
+      // Process related topics to add website summaries
+      const processedTopics = data.RelatedTopics ? data.RelatedTopics.map((topic: any) => {
+        // Extract domain from URL if present
+        let domain = '';
+        let summary = '';
+        
+        if (topic.FirstURL) {
+          try {
+            const url = new URL(topic.FirstURL);
+            domain = url.hostname;
+          } catch (e) {
+            // If URL parsing fails, use empty domain
+            console.error("Failed to parse URL:", e);
+          }
+        }
+        
+        // Create a brief summary from the Text if available
+        if (topic.Text) {
+          // Try to extract a reasonable summary (first 150 chars or so)
+          summary = topic.Text.length > 150 ? 
+            topic.Text.substring(0, 150) + '...' : 
+            topic.Text;
+        }
+        
+        return {
+          ...topic,
+          domain: domain,
+          summary: summary
+        };
+      }) : [];
+      
       const searchResults = {
         query,
         abstract: data.Abstract || '',
@@ -42,7 +73,7 @@ export function initSearchRoutes(app: Express) {
         abstractSource: data.AbstractSource || '',
         abstractURL: data.AbstractURL || '',
         results: data.Results || [],
-        relatedTopics: data.RelatedTopics || [],
+        relatedTopics: processedTopics,
         timestamp: new Date().toISOString()
       };
       

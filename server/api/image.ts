@@ -144,12 +144,12 @@ export function initImageRoutes(app: Express) {
           // Create assistant message with the image URLs
           await storage.createMessage({
             conversationId,
-            content: `I've generated ${generatedImages.length} ${generatedImages.length > 1 ? 'images' : 'image'} based on your prompt. ${generatedImages.map((img, i) => `\n\n![Image ${i+1}](${img.imageUrl})`).join('')}`,
+            content: `I've generated ${generatedImages.length} ${generatedImages.length > 1 ? 'images' : 'image'} based on your prompt. ${generatedImages.map((img: any, i: number) => `\n\n![Image ${i+1}](${img.imageUrl})`).join('')}`,
             role: "assistant",
             metadata: {
               imageGeneration: {
                 prompt,
-                images: generatedImages.map(img => ({
+                images: generatedImages.map((img: any) => ({
                   seed: img.seed,
                   finishReason: img.finishReason
                 }))

@@ -9,10 +9,10 @@ const searchRequestSchema = z.object({
 });
 
 export function initSearchRoutes(app: Express) {
-  app.post("/api/search", async (req: Request, res: Response) => {
+  app.post("/api/search", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { query } = searchRequestSchema.parse(req.body);
-      const userId = (req.user as any).id;
+      const userId = req.user ? (req.user as any).id : null;
       
       // DuckDuckGo API doesn't require an API key for basic search
       
@@ -83,7 +83,11 @@ export function initSearchRoutes(app: Express) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid search query", errors: error.errors });
       }
-      res.status(500).json({ message: "Failed to process search request" });
+      // Handle specific error types or return a generic error
+      res.status(500).json({ 
+        message: "Failed to process search request",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 }

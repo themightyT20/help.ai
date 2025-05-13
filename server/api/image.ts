@@ -96,12 +96,18 @@ export function initImageRoutes(app: Express) {
           const errorData = await response.json();
           console.error('Error details:', errorData);
 
-          // Return appropriate message based on status code
+          // Return appropriate message based on status code or error type
           if (response.status === 401) {
             return res.status(401).json({ message: 'Invalid Stability API key. Please check your API key in settings.' });
           } else if (response.status === 403) {
             return res.status(403).json({ message: 'Your Stability API key does not have permission to access this resource.' });
           } else if (response.status === 429) {
+            if (errorData?.name === 'insufficient_balance') {
+              return res.status(429).json({ 
+                message: 'Insufficient balance in your Stability AI account. Please add credits or try again later.',
+                details: errorData
+              });
+            }
             return res.status(429).json({ message: 'You have reached your Stability API rate limit. Please try again later.' });
           }
 

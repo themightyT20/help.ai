@@ -214,12 +214,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const updatedKeys = await storage.updateApiKey(userId, {
         togetherApiKey,
-        duckduckgoApiKey,
+        stabilityApiKey,
       });
       
       res.status(200).json({
         hasTogetherApiKey: Boolean(updatedKeys?.togetherApiKey),
-        hasDuckduckgoApiKey: Boolean(updatedKeys?.duckduckgoApiKey),
+        hasStabilityApiKey: Boolean(updatedKeys?.stabilityApiKey),
       });
     } catch (error) {
       console.error("Failed to update API keys:", error);

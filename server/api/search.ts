@@ -14,13 +14,7 @@ export function initSearchRoutes(app: Express) {
       const { query } = searchRequestSchema.parse(req.body);
       const userId = (req.user as any).id;
       
-      // Get user's API key
-      const apiKeys = await storage.getApiKeysByUserId(userId);
-      
-      // Use user's API key or fallback to environment variable
-      const duckduckgoApiKey = apiKeys?.duckduckgoApiKey || 
-                           process.env.DUCKDUCKGO_API_KEY || 
-                           "";
+      // DuckDuckGo API doesn't require an API key for basic search
       
       // For DuckDuckGo search, we'll use their text search as they don't require an API key
       // We're making a GET request to their instant answer API

@@ -62,6 +62,7 @@ export function initImageRoutes(app: Express) {
       const engineId = 'stable-diffusion-xl-1024-v1-0';
 
       // Build request to Stability API
+      console.log('Sending request to Stability AI with prompt:', prompt);
       const response = await fetch(
         `${apiHost}/v1/generation/${engineId}/text-to-image`,
         {
@@ -88,6 +89,12 @@ export function initImageRoutes(app: Express) {
           }),
         }
       );
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('Stability AI API error:', error);
+        throw new Error(error.message || 'Failed to generate image');
+      }
 
       if (!response.ok) {
         console.error(`Stability AI API error: ${response.status} ${response.statusText}`);

@@ -32,17 +32,17 @@ export function initSearchRoutes(app: Express) {
         return res.status(500).json({ message: "Failed to get search results" });
       }
       
-      const data = await response.json();
+      const data: any = await response.json();
       
       // Format the search results
       const searchResults = {
         query,
-        abstract: data.Abstract,
-        abstractText: data.AbstractText,
-        abstractSource: data.AbstractSource,
-        abstractURL: data.AbstractURL,
-        results: data.Results,
-        relatedTopics: data.RelatedTopics,
+        abstract: data.Abstract || '',
+        abstractText: data.AbstractText || '',
+        abstractSource: data.AbstractSource || '',
+        abstractURL: data.AbstractURL || '',
+        results: data.Results || [],
+        relatedTopics: data.RelatedTopics || [],
         timestamp: new Date().toISOString()
       };
       

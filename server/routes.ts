@@ -205,7 +205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // For guest users, pretend the API key update was successful
         return res.status(200).json({
           hasTogetherApiKey: true,
-          hasDuckduckgoApiKey: true
+          hasStabilityApiKey: true
         });
       }
       

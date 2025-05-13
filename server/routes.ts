@@ -9,6 +9,7 @@ import { initAuthRoutes } from "./api/auth";
 import { initChatRoutes } from "./api/chat";
 import { initSearchRoutes } from "./api/search";
 import { initCodeRoutes } from "./api/code";
+import { initImageRoutes } from "./api/image";
 import { isAuthenticated } from "./middleware/auth";
 import { setupAuth } from "./auth";
 
@@ -27,6 +28,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   initChatRoutes(app);
   initSearchRoutes(app);
   initCodeRoutes(app);
+  initImageRoutes(app);
 
   // Current user endpoint
   app.get("/api/me", isAuthenticated, (req: Request, res: Response) => {

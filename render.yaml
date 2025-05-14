@@ -11,6 +11,12 @@ services:
         fromDatabase:
           name: ai-chat-db
           property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: SEPER_DEV_API_KEY
+        sync: false
+      - key: PORT
+        value: 5000
 
 databases:
   - name: ai-chat-db

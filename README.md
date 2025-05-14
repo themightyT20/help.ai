@@ -39,7 +39,15 @@ An advanced AI chat application powered by Mixtral 8x7b, offering a comprehensiv
          - `SEPER_DEV_API_KEY`: Your Seper.dev API key (or set later in dashboard)
 
 4. **Initialize Database**
-   After deployment, run database migrations using Render Shell or connect to the database and run them manually.
+   After deployment, use the Render shell to run database migrations:
+   
+   a. Go to your deployed web service in the Render dashboard
+   b. Click on "Shell" in the top navigation
+   c. Run the following command to set up your database schema:
+      ```
+      npm run db:push
+      ```
+   d. This will create all necessary tables based on your schema.ts definitions
 
 ## Environment Variables
 
@@ -47,6 +55,27 @@ An advanced AI chat application powered by Mixtral 8x7b, offering a comprehensiv
 - `NODE_ENV`: Set to 'production' for deployment
 - `SEPER_DEV_API_KEY`: API key for Seper.dev search
 - `SESSION_SECRET`: Secret for session encryption
+
+## API Keys Setup
+
+This application uses several external services that require API keys:
+
+1. **Seper.dev API Key** (Required for web search)
+   - Register at [serper.dev](https://serper.dev/)
+   - Create an API key in your dashboard
+   - Add it to your Render environment variables or in the app settings
+
+2. **Together AI API Key** (Optional - for alternative AI model)
+   - Register at [together.ai](https://together.ai/)
+   - Create an API key
+   - Add it in the app settings after deployment
+
+3. **Stability API Key** (Optional - for image generation)
+   - Register at [stability.ai](https://stability.ai/)
+   - Create an API key
+   - Add it in the app settings after deployment
+
+You can add API keys either directly in your Render environment variables or through the application's settings page after deployment.
 
 ## Local Development
 

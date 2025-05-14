@@ -1,0 +1,6 @@
+name = "help-ai"
+compatibility_date = "2025-05-14"
+main = "dist/index.js"
+
+[site]
+bucket = "dist/public"

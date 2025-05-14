@@ -209,22 +209,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // For guest users, pretend the API key update was successful
         return res.status(200).json({
           hasTogetherApiKey: true,
-          hasStabilityApiKey: true
+          hasStabilityApiKey: true,
+          hasSeperDevApiKey: true
         });
       }
       
       const userId = (req.user as any).id;
-      const { togetherApiKey, stabilityApiKey } = req.body;
+      const { togetherApiKey, stabilityApiKey, seperDevApiKey } = req.body;
       
       const updatedKeys = await storage.updateApiKey(userId, {
         togetherApiKey,
         stabilityApiKey,
-        stabilityApiKey,
+        seperDevApiKey
       });
       
       res.status(200).json({
         hasTogetherApiKey: Boolean(updatedKeys?.togetherApiKey),
         hasStabilityApiKey: Boolean(updatedKeys?.stabilityApiKey),
+        hasSeperDevApiKey: Boolean(updatedKeys?.seperDevApiKey)
       });
     } catch (error) {
       console.error("Failed to update API keys:", error);

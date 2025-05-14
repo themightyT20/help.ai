@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { User, Bot } from "lucide-react";
+import { User, Bot, ExternalLink } from "lucide-react";
 import { CodeBlock } from "./code-block";
 
 interface ChatMessageProps {
@@ -49,6 +49,61 @@ export const ChatMessage = forwardRef<HTMLDivElement, ChatMessageProps>(
 
     const processedContent = processContent();
 
+    // Function to make URLs clickable
+    const makeLinksClickable = (text: string) => {
+      // More comprehensive regular expression to match URLs
+      // This handles http, https and www prefixed URLs
+      const urlRegex = /(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*))|((www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*))/g;
+      
+      // Find all URLs in the text
+      const urls = text.match(urlRegex) || [];
+      if (urls.length === 0) {
+        return text;
+      }
+      
+      // Split text by URLs and create React elements
+      let result = [];
+      let lastIndex = 0;
+      
+      for (let i = 0; i < urls.length; i++) {
+        const url = urls[i];
+        const urlIndex = text.indexOf(url, lastIndex);
+        
+        // Add text before the URL
+        if (urlIndex > lastIndex) {
+          result.push(text.substring(lastIndex, urlIndex));
+        }
+        
+        // Add the clickable URL
+        // Ensure URL has proper protocol for href
+        const hrefUrl = url.startsWith('http') ? url : `https://${url}`;
+        
+        result.push(
+          <a
+            key={`link-${i}`}
+            href={hrefUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`inline-flex items-center space-x-1 underline ${
+              role === "user" ? "text-blue-200" : "text-blue-600 dark:text-blue-400"
+            }`}
+          >
+            <span>{url}</span>
+            <ExternalLink className="h-3 w-3 inline-block" />
+          </a>
+        );
+        
+        lastIndex = urlIndex + url.length;
+      }
+      
+      // Add any remaining text after the last URL
+      if (lastIndex < text.length) {
+        result.push(text.substring(lastIndex));
+      }
+      
+      return result;
+    };
+
     return (
       <div ref={ref} className={`flex items-start space-x-4 mb-4 ${role === "user" ? "flex-row-reverse justify-start pl-12" : "pr-12"}`}>
         <div
@@ -71,12 +126,13 @@ export const ChatMessage = forwardRef<HTMLDivElement, ChatMessageProps>(
         >
           {processedContent.map((part, index) => {
             if (part.type === "text") {
-              // Split text content by newlines and preserve them
+              // Split text content by newlines and process each line
               const textWithLineBreaks = part.content
                 .split("\n")
                 .map((line, i, arr) => (
                   <span key={i}>
-                    {line}
+                    {/* Process each line to make URLs clickable */}
+                    {makeLinksClickable(line)}
                     {i < arr.length - 1 && <br />}
                   </span>
                 ));

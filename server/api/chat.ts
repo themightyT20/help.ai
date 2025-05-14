@@ -36,7 +36,7 @@ function detectWebSearchIntent(message: string): boolean {
 function formatWebSearchResults(results: any): string {
   let formattedText = '';
 
-  // Add abstract if available
+  // Add abstract if available (from answer box or knowledge graph)
   if (results.abstract) {
     formattedText += `Main result: ${results.abstract}\n`;
     if (results.abstractSource) {
@@ -44,24 +44,25 @@ function formatWebSearchResults(results: any): string {
     }
   }
 
-  // Add related topics with their sources
-  if (results.relatedTopics && results.relatedTopics.length > 0) {
-    formattedText += 'Related Information:\n';
+  // Add organic search results
+  if (results.results && results.results.length > 0) {
+    formattedText += 'Search Results:\n';
 
-    // Only include up to 5 related topics to keep response size manageable
-    const topicsToInclude = results.relatedTopics.slice(0, 5);
+    // Only include up to 5 results to keep response size manageable
+    const resultsToInclude = results.results.slice(0, 5);
 
-    topicsToInclude.forEach((topic: any, index: number) => {
-      if (topic.summary) {
-        formattedText += `${index + 1}. ${topic.summary}\n`;
-        if (topic.domain) {
-          formattedText += `   Source: ${topic.domain}\n`;
-        }
-        if (topic.FirstURL) {
-          formattedText += `   URL: ${topic.FirstURL}\n`;
-        }
-        formattedText += '\n';
+    resultsToInclude.forEach((result: any, index: number) => {
+      formattedText += `${index + 1}. ${result.title || 'Untitled'}\n`;
+      if (result.snippet) {
+        formattedText += `   ${result.snippet}\n`;
       }
+      if (result.domain) {
+        formattedText += `   Source: ${result.domain}\n`;
+      }
+      if (result.link) {
+        formattedText += `   URL: ${result.link}\n`;
+      }
+      formattedText += '\n';
     });
   }
 

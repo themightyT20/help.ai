@@ -85,16 +85,26 @@ export async function generateCodeDownload(code: string, language: string, filen
 }
 
 // API key functions
-export async function saveApiKeys(togetherApiKey?: string, stabilityApiKey?: string): Promise<{
+export async function saveApiKeys(
+  togetherApiKey?: string, 
+  stabilityApiKey?: string,
+  seperDevApiKey?: string
+): Promise<{
   hasTogetherApiKey: boolean;
   hasStabilityApiKey: boolean;
+  hasSeperDevApiKey: boolean;
 }> {
-  return apiRequest("POST", "/api-keys", { togetherApiKey, stabilityApiKey });
+  return apiRequest("POST", "/api-keys", { 
+    togetherApiKey, 
+    stabilityApiKey,
+    seperDevApiKey
+  });
 }
 
 export async function getApiKeysStatus(): Promise<{
   hasTogetherApiKey: boolean;
   hasStabilityApiKey: boolean;
+  hasSeperDevApiKey: boolean;
 }> {
   return apiRequest("GET", "/api-keys");
 }

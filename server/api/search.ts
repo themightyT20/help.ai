@@ -60,7 +60,7 @@ export function initSearchRoutes(app: Express) {
         });
       }
       
-      const data = await response.json();
+      const data = await response.json() as any;
       
       // Process the Google search results
       const organicResults = data.organic || [];

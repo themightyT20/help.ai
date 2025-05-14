@@ -45,6 +45,7 @@ interface SettingsModalProps {
 const apiKeysSchema = z.object({
   togetherApiKey: z.string().optional(),
   stabilityApiKey: z.string().optional(),
+  seperDevApiKey: z.string().optional(),
 });
 
 export function SettingsModal({ onClose }: SettingsModalProps) {
@@ -53,8 +54,10 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
   const [activeTab, setActiveTab] = useState("general");
   const [showTogetherApiKey, setShowTogetherApiKey] = useState(false);
   const [showStabilityApiKey, setShowStabilityApiKey] = useState(false);
+  const [showSeperDevApiKey, setShowSeperDevApiKey] = useState(false);
   const [hasTogetherApiKey, setHasTogetherApiKey] = useState(false);
   const [hasStabilityApiKey, setHasStabilityApiKey] = useState(false);
+  const [hasSeperDevApiKey, setHasSeperDevApiKey] = useState(false);
 
   // Load settings from local storage
   const userSettings = loadSettings();
@@ -71,6 +74,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     defaultValues: {
       togetherApiKey: "",
       stabilityApiKey: "",
+      seperDevApiKey: "",
     },
   });
 
@@ -81,6 +85,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
         .then((data) => {
           setHasTogetherApiKey(data.hasTogetherApiKey);
           setHasStabilityApiKey(data.hasStabilityApiKey);
+          setHasSeperDevApiKey(data.hasSeperDevApiKey);
         })
         .catch((error) => {
           console.error("Failed to get API key status:", error);

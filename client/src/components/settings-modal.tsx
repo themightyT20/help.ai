@@ -122,15 +122,18 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     try {
       const result = await saveApiKeys(
         values.togetherApiKey || undefined,
-        values.stabilityApiKey || undefined
+        values.stabilityApiKey || undefined,
+        values.seperDevApiKey || undefined
       );
       
       setHasTogetherApiKey(result.hasTogetherApiKey);
       setHasStabilityApiKey(result.hasStabilityApiKey);
+      setHasSeperDevApiKey(result.hasSeperDevApiKey);
       
       apiKeysForm.reset({
         togetherApiKey: "",
         stabilityApiKey: "",
+        seperDevApiKey: "",
       });
       
       toast({
@@ -349,6 +352,48 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                         </div>
                         <FormDescription>
                           Required for image generation functionality
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={apiKeysForm.control}
+                    name="seperDevApiKey"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Seper.dev API Key</FormLabel>
+                        <div className="relative">
+                          <FormControl>
+                            <Input
+                              placeholder={
+                                hasSeperDevApiKey
+                                  ? "API key already saved"
+                                  : "Enter your Seper.dev API key"
+                              }
+                              type={showSeperDevApiKey ? "text" : "password"}
+                              {...field}
+                            />
+                          </FormControl>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                            onClick={() =>
+                              setShowSeperDevApiKey(!showSeperDevApiKey)
+                            }
+                          >
+                            {showSeperDevApiKey ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                        <FormDescription>
+                          Required for web search functionality
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

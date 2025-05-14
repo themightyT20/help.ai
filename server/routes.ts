@@ -180,7 +180,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // For guest users, return default API key state
         return res.json({
           hasTogetherApiKey: false,
-          hasStabilityApiKey: false
+          hasStabilityApiKey: false,
+          hasSeperDevApiKey: false
         });
       }
       
@@ -190,7 +191,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Don't return actual keys, just whether they exist
       const sanitizedKeys = {
         hasTogetherApiKey: Boolean(apiKeys?.togetherApiKey || process.env.TOGETHER_AI_API_KEY),
-        hasStabilityApiKey: Boolean(process.env.STABILITY_API_KEY)
+        hasStabilityApiKey: Boolean(apiKeys?.stabilityApiKey || process.env.STABILITY_API_KEY),
+        hasSeperDevApiKey: Boolean(apiKeys?.seperDevApiKey || process.env.SEPER_DEV_API_KEY)
       };
       
       res.json(sanitizedKeys);

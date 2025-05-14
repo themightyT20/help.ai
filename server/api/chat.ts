@@ -8,7 +8,7 @@ import fetch from "node-fetch";
 // Function to detect if a message is requesting web search information
 function detectWebSearchIntent(message: string): boolean {
   const message_lower = message.toLowerCase();
-  
+
   // Look for web search intent patterns
   const searchPatterns = [
     /search (?:for|about|on) .+/i,
@@ -27,7 +27,7 @@ function detectWebSearchIntent(message: string): boolean {
     /find articles (?:on|about) .+/i,
     /^can you (search|find|lookup|get) .+/i
   ];
-  
+
   // Check if any pattern matches the message
   return searchPatterns.some(pattern => pattern.test(message));
 }
@@ -35,7 +35,7 @@ function detectWebSearchIntent(message: string): boolean {
 // Function to format web search results into a readable summary
 function formatWebSearchResults(results: any): string {
   let formattedText = '';
-  
+
   // Add abstract if available
   if (results.abstract) {
     formattedText += `Main result: ${results.abstract}\n`;
@@ -43,14 +43,14 @@ function formatWebSearchResults(results: any): string {
       formattedText += `Source: ${results.abstractSource} (${results.abstractURL || 'No URL provided'})\n\n`;
     }
   }
-  
+
   // Add related topics with their sources
   if (results.relatedTopics && results.relatedTopics.length > 0) {
     formattedText += 'Related Information:\n';
-    
+
     // Only include up to 5 related topics to keep response size manageable
     const topicsToInclude = results.relatedTopics.slice(0, 5);
-    
+
     topicsToInclude.forEach((topic: any, index: number) => {
       if (topic.summary) {
         formattedText += `${index + 1}. ${topic.summary}\n`;
@@ -64,7 +64,7 @@ function formatWebSearchResults(results: any): string {
       }
     });
   }
-  
+
   return formattedText;
 }
 
@@ -78,7 +78,7 @@ export function initChatRoutes(app: Express) {
   app.post("/api/chat", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { message, conversationId } = messageRequestSchema.parse(req.body);
-      
+
       // Detect if this message is requesting web search information
       const shouldPerformWebSearch = detectWebSearchIntent(message);
 
@@ -194,19 +194,19 @@ export function initChatRoutes(app: Express) {
       if (userMemory) {
         // Format memory in a more concise way to avoid large payloads
         let memoryString = "";
-        
+
         // Make sure userMemory is properly formatted
         const userMemoryObj = typeof userMemory === 'string' 
           ? JSON.parse(userMemory) 
           : (userMemory || {});
-        
+
         if (userMemoryObj.conversations && Array.isArray(userMemoryObj.conversations) && userMemoryObj.conversations.length > 0) {
           memoryString = userMemoryObj.conversations
             .slice(-5) // Only include the 5 most recent memory items
             .map((conv: any) => `- Topic: ${conv.topic || 'Unknown'}, Response: ${conv.response || 'No response'}`)
             .join("\n");
         }
-        
+
         // Only add memory if we actually have something to add
         if (memoryString) {
           systemMessage.content += `\n\nHere is some context from previous conversations with this user:\n${memoryString}`;
@@ -218,18 +218,20 @@ export function initChatRoutes(app: Express) {
       if (shouldPerformWebSearch) {
         try {
           console.log(`Detected web search intent in message: "${message}"`);
-          
+
           // Call the search endpoint
           const searchResponse = await fetch(`http://localhost:${process.env.PORT || 5000}/api/search`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": req.headers.authorization || "",
+              "X-Replit-User-Id": req.headers["x-replit-user-id"] as string,
+              "X-Replit-User-Name": req.headers["x-replit-user-name"] as string,
+              "X-Replit-User-Roles": req.headers["x-replit-user-roles"] as string,
               ...(isGuestMode ? { "x-guest-mode": "true" } : {})
             },
             body: JSON.stringify({ query: message })
           });
-          
+
           if (searchResponse.ok) {
             webSearchResults = await searchResponse.json();
             console.log("Web search successful");
@@ -245,7 +247,7 @@ export function initChatRoutes(app: Express) {
       // Get API keys from environment or user config
       const stabilityApiKey = process.env.STABILITY_API_KEY;
       // Note: togetherApiKey is already defined above
-      
+
       // If we have web search results, add them to the system message
       if (webSearchResults) {
         const webInfo = formatWebSearchResults(webSearchResults);
@@ -318,17 +320,17 @@ export function initChatRoutes(app: Express) {
               topic: string;
               response: string;
             }> } = { conversations: [] };
-            
+
             // Parse existing memory if it exists
             if (user.memory) {
               try {
                 const existingMemory = typeof user.memory === 'string' 
                   ? JSON.parse(user.memory)
                   : user.memory;
-                
+
                 if (existingMemory && typeof existingMemory === 'object') {
                   memoryObj = existingMemory;
-                  
+
                   // Ensure conversations array exists
                   if (!Array.isArray(memoryObj.conversations)) {
                     memoryObj.conversations = [];

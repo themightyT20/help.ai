@@ -61,12 +61,14 @@ export const apiKeys = pgTable("api_keys", {
   userId: integer("user_id").notNull().references(() => users.id),
   togetherApiKey: text("together_api_key"),
   stabilityApiKey: text("stability_api_key"),
+  seperDevApiKey: text("seper_dev_api_key"),
 });
 
 export const insertApiKeySchema = createInsertSchema(apiKeys).pick({
   userId: true,
   togetherApiKey: true,
   stabilityApiKey: true,
+  seperDevApiKey: true,
 });
 
 // Types

@@ -209,7 +209,8 @@ export class DatabaseStorage implements IStorage {
     const apiKeyData = {
       ...insertApiKey,
       togetherApiKey: insertApiKey.togetherApiKey ?? null,
-      stabilityApiKey: insertApiKey.stabilityApiKey ?? null
+      stabilityApiKey: insertApiKey.stabilityApiKey ?? null,
+      seperDevApiKey: insertApiKey.seperDevApiKey ?? null
     };
 
     const [apiKey] = await db
@@ -229,7 +230,8 @@ export class DatabaseStorage implements IStorage {
         userId, 
         ...apiKeyData,
         togetherApiKey: apiKeyData.togetherApiKey ?? null, 
-        stabilityApiKey: apiKeyData.stabilityApiKey ?? null 
+        stabilityApiKey: apiKeyData.stabilityApiKey ?? null,
+        seperDevApiKey: apiKeyData.seperDevApiKey ?? null
       } as InsertApiKey);
     }
 

@@ -14,66 +14,88 @@ export function initSearchRoutes(app: Express) {
       const { query } = searchRequestSchema.parse(req.body);
       const userId = req.user ? (req.user as any).id : null;
       
-      // DuckDuckGo API doesn't require an API key for basic search
+      // Get the API key from the database if the user is logged in
+      let seperDevApiKey = process.env.SEPER_DEV_API_KEY || ''; // Default to env variable if available
       
-      // For DuckDuckGo search, we'll use their text search as they don't require an API key
-      // We're making a GET request to their instant answer API
-      const encodedQuery = encodeURIComponent(query);
-      
-      const response = await fetch(`https://api.duckduckgo.com/?q=${encodedQuery}&format=json&pretty=1`, {
-        method: "GET",
-        headers: {
-          "Accept": "application/json",
+      if (userId) {
+        try {
+          const userApiKeys = await storage.getApiKeysByUserId(userId);
+          if (userApiKeys && userApiKeys.seperDevApiKey) {
+            seperDevApiKey = userApiKeys.seperDevApiKey;
+          }
+        } catch (error) {
+          console.error("Error fetching API key:", error);
+          // Continue with env variable if available
         }
+      }
+      
+      if (!seperDevApiKey) {
+        return res.status(400).json({ 
+          message: "Seper.dev API key not found. Please add it in your settings.",
+          missingApiKey: true
+        });
+      }
+      
+      // Use seper.dev Google Search API
+      const apiUrl = `https://google.serper.dev/search`;
+      
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "X-API-KEY": seperDevApiKey,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          q: query,
+          gl: "us", // Google locale (country of search)
+          hl: "en"  // Language for search results
+        })
       });
       
       if (!response.ok) {
-        console.error("DuckDuckGo search error:", await response.text());
-        return res.status(500).json({ message: "Failed to get search results" });
+        console.error("Seper.dev search error:", await response.text());
+        return res.status(response.status).json({ 
+          message: "Failed to get search results from Seper.dev",
+          status: response.status
+        });
       }
       
-      const data: any = await response.json();
+      const data = await response.json();
       
-      // Format the search results
-      // Process related topics to add website summaries
-      const processedTopics = data.RelatedTopics ? data.RelatedTopics.map((topic: any) => {
+      // Process the Google search results
+      const organicResults = data.organic || [];
+      
+      const processedResults = organicResults.map((result: any) => {
         // Extract domain from URL if present
         let domain = '';
-        let summary = '';
-        
-        if (topic.FirstURL) {
+        if (result.link) {
           try {
-            const url = new URL(topic.FirstURL);
+            const url = new URL(result.link);
             domain = url.hostname;
           } catch (e) {
-            // If URL parsing fails, use empty domain
             console.error("Failed to parse URL:", e);
           }
         }
         
-        // Create a brief summary from the Text if available
-        if (topic.Text) {
-          // Try to extract a reasonable summary (first 150 chars or so)
-          summary = topic.Text.length > 150 ? 
-            topic.Text.substring(0, 150) + '...' : 
-            topic.Text;
-        }
-        
         return {
-          ...topic,
+          title: result.title || '',
+          snippet: result.snippet || '',
+          link: result.link || '',
           domain: domain,
-          summary: summary
+          position: result.position,
+          attributes: result.attributes || {}
         };
-      }) : [];
+      });
       
+      // Format the search results in a structure compatible with our app
       const searchResults = {
         query,
-        abstract: data.Abstract || '',
-        abstractText: data.AbstractText || '',
-        abstractSource: data.AbstractSource || '',
-        abstractURL: data.AbstractURL || '',
-        results: data.Results || [],
-        relatedTopics: processedTopics,
+        abstract: data.answerBox?.answer || data.knowledgeGraph?.description || '',
+        abstractText: data.answerBox?.snippet || '',
+        abstractSource: data.answerBox?.source?.name || data.knowledgeGraph?.title || '',
+        abstractURL: data.answerBox?.source?.link || data.knowledgeGraph?.siteLinks?.[0]?.link || '',
+        results: processedResults,
+        searchInformation: data.searchInformation || {},
         timestamp: new Date().toISOString()
       };
       

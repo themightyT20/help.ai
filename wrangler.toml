@@ -1,4 +1,4 @@
-name = "help-ai"
+name = "help-ai-final"
 compatibility_date = "2025-05-14"
 main = "dist/index.js"
 

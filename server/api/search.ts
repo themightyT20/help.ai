@@ -9,15 +9,27 @@ const searchRequestSchema = z.object({
 });
 
 export function initSearchRoutes(app: Express) {
-  app.post("/api/search", isAuthenticated, async (req: Request, res: Response) => {
+  app.post("/api/search", async (req: Request, res: Response) => {
+    // Check if this is an internal API call or if the user is authenticated
+    const isInternalCall = req.headers["authorization"] === "Internal-API-Call";
+    const isUserAuthenticated = req.isAuthenticated?.() || false;
+    
+    if (!isUserAuthenticated && !isInternalCall) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
     try {
       const { query } = searchRequestSchema.parse(req.body);
-      const userId = req.user ? (req.user as any).id : null;
+      
+      // Handle user ID from either the authenticated session or the internal API call
+      let userId = req.user ? (req.user as any).id : null;
+      if (!userId && req.headers["user-id"]) {
+        userId = parseInt(req.headers["user-id"] as string, 10);
+      }
       
       // Get the API key from the database if the user is logged in
       let seperDevApiKey = process.env.SEPER_DEV_API_KEY || ''; // Default to env variable if available
       
-      if (userId) {
+      if (userId && userId > 0) {
         try {
           const userApiKeys = await storage.getApiKeysByUserId(userId);
           if (userApiKeys && userApiKeys.seperDevApiKey) {

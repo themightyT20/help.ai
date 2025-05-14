@@ -228,6 +228,8 @@ export function initChatRoutes(app: Express) {
               "X-Replit-User-Id": req.headers["x-replit-user-id"] as string,
               "X-Replit-User-Name": req.headers["x-replit-user-name"] as string,
               "X-Replit-User-Roles": req.headers["x-replit-user-roles"] as string,
+              "Authorization": "Internal-API-Call",
+              "User-ID": userId?.toString() || "0",
               ...(isGuestMode ? { "x-guest-mode": "true" } : {})
             },
             body: JSON.stringify({ query: message })

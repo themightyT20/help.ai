@@ -1,6 +1,10 @@
-name = "help-ai-final"
-compatibility_date = "2025-05-14"
-main = "dist/index.js"
+
+name = "ai-chat-app"
+compatibility_date = "2023-01-01"
+
+[build]
+command = "npm run build"
+dist = "dist"
 
 [site]
-bucket = "dist/public"
+bucket = "./dist"

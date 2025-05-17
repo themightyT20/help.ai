@@ -1,3 +1,6 @@
+// This file can directly replace your current vite.ts
+// Make sure to rebuild your project after replacing
+
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
@@ -77,8 +80,9 @@ export function serveStatic(app: Express) {
   // Use __dirname instead of import.meta.dirname
   const distPath = path.resolve(__dirname, "../public");
   
+  log(`Looking for build directory at: ${distPath}`);
+  
   if (!fs.existsSync(distPath)) {
-    log(`Looking for build directory at: ${distPath}`);
     throw new Error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`,
     );

@@ -74,6 +74,7 @@ export function initAuthRoutes(app: Express) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid registration data", errors: error.errors });
       }
+      console.error("Registration error:", error); // Log the error for debugging
       res.status(500).json({ message: "Failed to register user" });
     }
   });

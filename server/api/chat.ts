@@ -265,7 +265,7 @@ export function initChatRoutes(app: Express) {
           "Authorization": `Bearer ${togetherApiKey}`
         },
         body: JSON.stringify({
-          model: "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO",
+          model: "meta-llama/Llama-3-70b-chat-hf",
           messages: [
             systemMessage,
             ...formattedHistory
